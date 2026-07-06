@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+/* Aesthetic glassmorphism backdrop: a soft, colorful gradient mesh that
+   stays fixed so frosted panels read as real glass while scrolling. */
+body {
+  min-height: 100vh;
+  color: #1f2937;
+  background:
+    radial-gradient(1200px 620px at 6% -8%, rgba(129, 140, 248, 0.42), transparent 60%),
+    radial-gradient(1050px 720px at 102% -2%, rgba(217, 70, 239, 0.26), transparent 55%),
+    radial-gradient(920px 760px at 50% 116%, rgba(34, 211, 238, 0.28), transparent 55%),
+    linear-gradient(160deg, #eef2ff 0%, #f5f3ff 42%, #fdf2f8 100%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "tnum" 1; /* tabular figures for money columns */
+}
+
+@layer components {
+  /* Primary frosted panel — cards, dropdowns, table shells. */
+  .glass {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 12px 34px -14px rgba(49, 46, 129, 0.28);
+  }
+
+  /* Lighter frost — toolbars, empty states, inset sections. */
+  .glass-soft {
+    background: rgba(255, 255, 255, 0.42);
+    backdrop-filter: blur(14px) saturate(150%);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
+  /* Sticky chrome — sidebar and top bar. */
+  .glass-nav {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(18px) saturate(155%);
+    -webkit-backdrop-filter: blur(18px) saturate(155%);
+  }
+
+  /* Strong frost for modals so form text stays crisp. */
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(26px) saturate(165%);
+    -webkit-backdrop-filter: blur(26px) saturate(165%);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 24px 60px -18px rgba(49, 46, 129, 0.4);
+  }
+
+  /* Translucent form controls. Border stays visible for usability. */
+  .glass-input {
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(30, 41, 59, 0.12);
+    transition: background-color 150ms ease, border-color 150ms ease;
+  }
+  .glass-input::placeholder {
+    color: rgba(71, 85, 105, 0.7);
+  }
+  .glass-input:focus {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: theme("colors.brand.DEFAULT");
+  }
+}
+
+/* Visible, consistent focus ring for keyboard users. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid theme("colors.brand.DEFAULT");
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Number inputs: hide spinners for a cleaner money field. */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Thin scrollbars for horizontally scrollable tables. */
+.scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Print: flatten glass to plain paper and show only the invoice. */
+@media print {
+  body {
+    background: #fff !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .glass,
+  .glass-soft,
+  .glass-nav,
+  .glass-strong {
+    background: #fff !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    border-color: #e5e7eb !important;
+  }
+  .print-area {
+    box-shadow: none !important;
+    border: none !important;
+  }
+}

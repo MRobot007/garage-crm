@@ -1,0 +1,127 @@
+// Car Garage CRM — Prisma schema
+// Money is stored as whole Rupees (Int). GST percent is an Int.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+/// Sales pipeline lead.
+model Lead {
+  id           String    @id @default(cuid())
+  name         String
+  phone        String
+  interestedIn String?
+  source       String    @default("Walk-in") // Walk-in | WhatsApp | Website | Marketplace
+  status       String    @default("New") // New | Contacted | TestDrive | Negotiation | Won | Lost
+  followUpDate DateTime?
+  staff        String?
+  notes        String?   @db.Text
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([status])
+  @@index([source])
+}
+
+/// A car in inventory.
+model Car {
+  id           String   @id @default(cuid())
+  make         String
+  model        String
+  year         Int
+  type         String   @default("Used") // New | Used
+  regNo        String   @unique
+  km           Int      @default(0)
+  costPrice    Int
+  askingPrice  Int
+  status       String   @default("Available") // Available | Reserved | Sold
+  addedDate    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  invoice Invoice?
+
+  @@index([status])
+  @@index([type])
+}
+
+/// An accessory SKU in stock.
+model Accessory {
+  id           String   @id @default(cuid())
+  name         String
+  sku          String   @unique
+  category     String
+  qty          Int      @default(0)
+  costPrice    Int
+  sellPrice    Int
+  reorderLevel Int      @default(5)
+  supplier     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  items InvoiceItem[]
+
+  @@index([category])
+}
+
+/// A customer, upserted from leads and invoices.
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String   @unique
+  email     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  invoices Invoice[]
+}
+
+/// A sale invoice — optional single car + multiple accessory line items.
+model Invoice {
+  id         String   @id @default(cuid())
+  invoiceNo  String   @unique
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  carId      String?  @unique
+  car        Car?     @relation(fields: [carId], references: [id])
+  date       DateTime @default(now())
+  discount   Int      @default(0)
+  gstPercent Int      @default(8)
+  subtotal   Int
+  gst        Int
+  total      Int
+  received   Int      @default(0)
+  status     String   @default("Pending") // Paid | Partial | Pending
+  staff      String?
+  notes      String?  @db.Text
+
+  items InvoiceItem[]
+
+  @@index([status])
+  @@index([date])
+}
+
+/// One line on an invoice (a car line or an accessory line).
+model InvoiceItem {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  accessoryId String?
+  accessory   Accessory? @relation(fields: [accessoryId], references: [id])
+  kind        String  @default("accessory") // car | accessory
+  name        String
+  qty         Int     @default(1)
+  price       Int // unit price in Rupees
+}
+
+/// Singleton settings row (id is always "default").
+model Setting {
+  id           String @id @default("default")
+  businessName String @default("Garage CRM")
+  currency     String @default("$")
+  gstPercent   Int    @default(8)
+}

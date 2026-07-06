@@ -1,0 +1,2 @@
+# Normalize line endings to LF in the repo (consistent on Linux CI / Vercel).
+* text=auto eol=lf

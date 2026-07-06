@@ -1,0 +1,137 @@
+import { z } from "zod";
+import {
+  CAR_STATUSES,
+  CAR_TYPES,
+  INVOICE_STATUSES,
+  LEAD_SOURCES,
+  LEAD_STATUSES,
+} from "./constants";
+
+// Coerce optional-empty-string form fields into undefined.
+const optionalStr = z
+  .string()
+  .trim()
+  .optional()
+  .transform((v) => (v === "" ? undefined : v));
+
+const phoneSchema = z
+  .string()
+  .trim()
+  .min(7, "Enter a valid phone number")
+  .max(20, "Phone number is too long");
+
+const nonNegInt = z.coerce
+  .number()
+  .int("Must be a whole number")
+  .min(0, "Cannot be negative");
+
+const positiveIntFromNow = z.coerce.number().int().min(0);
+
+// ----------------------------- Lead -----------------------------
+export const leadSchema = z.object({
+  name: z.string().trim().min(2, "Name is required"),
+  phone: phoneSchema,
+  interestedIn: optionalStr,
+  source: z.enum(LEAD_SOURCES).default("Walk-in"),
+  status: z.enum(LEAD_STATUSES).default("New"),
+  followUpDate: optionalStr, // ISO date string (YYYY-MM-DD) or undefined
+  staff: optionalStr,
+  notes: optionalStr,
+});
+export type LeadInput = z.input<typeof leadSchema>;
+export type LeadValues = z.infer<typeof leadSchema>;
+
+// ----------------------------- Car ------------------------------
+export const carBaseSchema = z.object({
+  make: z.string().trim().min(1, "Make is required"),
+  model: z.string().trim().min(1, "Model is required"),
+  year: z.coerce
+    .number()
+    .int()
+    .min(1950, "Enter a valid year")
+    .max(new Date().getFullYear() + 1, "Year looks too far in the future"),
+  type: z.enum(CAR_TYPES).default("Used"),
+  regNo: z.string().trim().min(1, "Registration number is required"),
+  km: nonNegInt.default(0),
+  costPrice: nonNegInt,
+  askingPrice: nonNegInt,
+  status: z.enum(CAR_STATUSES).default("Available"),
+});
+// Full-create schema (base + cross-field checks). Use carBaseSchema.partial() for PATCH.
+export const carSchema = carBaseSchema;
+export type CarInput = z.input<typeof carSchema>;
+export type CarValues = z.infer<typeof carSchema>;
+
+// -------------------------- Accessory ---------------------------
+export const accessorySchema = z.object({
+  name: z.string().trim().min(1, "Name is required"),
+  sku: z.string().trim().min(1, "SKU is required"),
+  category: z.string().trim().min(1, "Category is required"),
+  qty: nonNegInt.default(0),
+  costPrice: nonNegInt,
+  sellPrice: nonNegInt,
+  reorderLevel: nonNegInt.default(5),
+  supplier: optionalStr,
+});
+export type AccessoryInput = z.input<typeof accessorySchema>;
+export type AccessoryValues = z.infer<typeof accessorySchema>;
+
+export const adjustStockSchema = z.object({
+  delta: z.coerce.number().int(),
+});
+
+// --------------------------- Customer ---------------------------
+export const customerSchema = z.object({
+  name: z.string().trim().min(2, "Name is required"),
+  phone: phoneSchema,
+  email: z
+    .string()
+    .trim()
+    .email("Enter a valid email")
+    .optional()
+    .or(z.literal(""))
+    .transform((v) => (v ? v : undefined)),
+});
+export type CustomerValues = z.infer<typeof customerSchema>;
+
+// ---------------------------- Invoice ---------------------------
+export const invoiceItemSchema = z.object({
+  accessoryId: z.string().min(1, "Pick an accessory"),
+  name: z.string().min(1),
+  qty: z.coerce.number().int().min(1, "Qty must be at least 1"),
+  price: nonNegInt,
+});
+
+export const invoiceSchema = z
+  .object({
+    // customer: either an existing id, or new name+phone.
+    customerId: optionalStr,
+    customerName: optionalStr,
+    customerPhone: optionalStr,
+    customerEmail: optionalStr,
+    carId: optionalStr,
+    items: z.array(invoiceItemSchema).default([]),
+    discount: nonNegInt.default(0),
+    gstPercent: nonNegInt.default(8),
+    received: nonNegInt.default(0),
+    staff: optionalStr,
+    notes: optionalStr,
+  })
+  .refine((v) => Boolean(v.customerId) || Boolean(v.customerName && v.customerPhone), {
+    message: "Choose a customer or enter a name and phone",
+    path: ["customerName"],
+  })
+  .refine((v) => Boolean(v.carId) || (v.items && v.items.length > 0), {
+    message: "Add a car and/or at least one accessory",
+    path: ["items"],
+  });
+export type InvoiceInput = z.input<typeof invoiceSchema>;
+export type InvoiceValues = z.infer<typeof invoiceSchema>;
+
+// ---------------------------- Settings --------------------------
+export const settingsSchema = z.object({
+  businessName: z.string().trim().min(1, "Business name is required"),
+  currency: z.string().trim().min(1).default("₹"),
+  gstPercent: positiveIntFromNow.max(100, "Tax cannot exceed 100%").default(8),
+});
+export type SettingsValues = z.infer<typeof settingsSchema>;
