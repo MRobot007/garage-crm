@@ -29,18 +29,22 @@ export function Sidebar({ collapsed, onNavigate }: SidebarProps) {
   return (
     <nav
       aria-label="Main navigation"
-      className="flex h-full flex-col gap-1 p-3"
+      className="flex h-full flex-col gap-1 bg-[linear-gradient(180deg,#0c4a45_0%,#0a3a37_50%,#062725_100%)] p-3 text-teal-50"
     >
       <div
         className={cn(
-          "mb-4 flex items-center gap-2 px-2 py-2",
+          "mb-4 flex items-center gap-2.5 px-2 py-2",
           collapsed && "justify-center px-0",
         )}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="VOZIDEX" className="h-9 w-9 shrink-0 object-contain" />
+        <img
+          src="/logo.png"
+          alt="VOZIDEX"
+          className="h-9 w-9 shrink-0 rounded-lg bg-white/10 object-contain p-1 ring-1 ring-white/15"
+        />
         {!collapsed && (
-          <span className="text-[15px] font-semibold tracking-tight text-ink">
+          <span className="text-[15px] font-semibold tracking-tight text-white">
             VOZIDEX
           </span>
         )}
@@ -59,8 +63,8 @@ export function Sidebar({ collapsed, onNavigate }: SidebarProps) {
               "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
               collapsed && "justify-center px-0",
               active
-                ? "bg-gradient-to-r from-brand/20 to-brand/5 text-brand shadow-sm ring-1 ring-white/50"
-                : "text-gray-600 hover:bg-white/60 hover:text-ink",
+                ? "bg-white/[0.13] text-white shadow-sm ring-1 ring-inset ring-white/15"
+                : "text-teal-50/70 hover:bg-white/[0.08] hover:text-white",
             )}
           >
             <span className="shrink-0">{item.icon}</span>
@@ -70,7 +74,7 @@ export function Sidebar({ collapsed, onNavigate }: SidebarProps) {
       })}
 
       {!collapsed && (
-        <p className="mt-auto px-3 pt-4 text-xs text-gray-500">
+        <p className="mt-auto px-3 pt-4 text-xs text-teal-100/45">
           VOZIDEX Customs · USA
         </p>
       )}

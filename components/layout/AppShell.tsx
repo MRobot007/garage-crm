@@ -29,7 +29,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Desktop sidebar */}
       <aside
         className={cn(
-          "glass-nav no-print hidden shrink-0 border-r border-white/50 transition-[width] duration-200 md:block",
+          "no-print hidden shrink-0 border-r border-black/10 shadow-[4px_0_24px_-12px_rgba(6,39,37,0.5)] transition-[width] duration-200 md:block",
           collapsed ? "w-16" : "w-60",
         )}
       >
@@ -46,7 +46,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             onClick={() => setDrawerOpen(false)}
             aria-hidden
           />
-          <aside className="glass-strong absolute left-0 top-0 h-full w-64 shadow-2xl">
+          <aside className="absolute left-0 top-0 h-full w-64 shadow-2xl">
             <Sidebar collapsed={false} onNavigate={() => setDrawerOpen(false)} />
           </aside>
         </div>
