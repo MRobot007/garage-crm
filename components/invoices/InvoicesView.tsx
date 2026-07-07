@@ -40,7 +40,7 @@ export function InvoicesView() {
 
   const [createOpen, setCreateOpen] = useState(false);
   const [prefill, setPrefill] = useState<
-    { name?: string; phone?: string; carId?: string } | undefined
+    { name?: string; phone?: string; carId?: string; email?: string; accessory?: string } | undefined
   >(undefined);
   const [payFor, setPayFor] = useState<Invoice | null>(null);
   const [payAmount, setPayAmount] = useState("");
@@ -55,6 +55,8 @@ export function InvoicesView() {
         name: params.get("name") ?? undefined,
         phone: params.get("phone") ?? undefined,
         carId: params.get("carId") ?? undefined,
+        email: params.get("email") ?? undefined,
+        accessory: params.get("accessory") ?? undefined,
       });
       setCreateOpen(true);
       router.replace("/invoices");
@@ -219,7 +221,7 @@ export function InvoicesView() {
         open={createOpen}
         onClose={() => setCreateOpen(false)}
         prefill={prefill}
-        onCreated={(id) => router.push(`/invoices/${id}`)}
+        onCreated={(id) => router.push(`/invoices/${id}?print=1`)}
       />
 
       {/* Record payment */}

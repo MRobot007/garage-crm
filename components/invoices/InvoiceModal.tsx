@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -23,6 +23,8 @@ interface Prefill {
   name?: string;
   phone?: string;
   carId?: string;
+  email?: string;
+  accessory?: string; // the accessory the lead asked about — auto-added as a line
 }
 interface InvoiceModalProps {
   open: boolean;
@@ -69,6 +71,8 @@ export function InvoiceModal({ open, onClose, prefill, onCreated }: InvoiceModal
   );
   const selectedCar = availableCars.find((c) => c.id === carId);
 
+  const appliedAcc = useRef(false);
+
   // Reset when (re)opened.
   useEffect(() => {
     if (!open) return;
@@ -77,14 +81,33 @@ export function InvoiceModal({ open, onClose, prefill, onCreated }: InvoiceModal
     setCustomerId("");
     setCustomerName(prefill?.name ?? "");
     setCustomerPhone(prefill?.phone ?? "");
-    setCustomerEmail("");
+    setCustomerEmail(prefill?.email ?? "");
     setCarId(prefill?.carId ?? "");
     setItems([]);
     setDiscount("0");
     setGstPercent(String(settings?.gstPercent ?? 8));
     setReceived("0");
     setAddAccId("");
+    appliedAcc.current = false;
   }, [open, prefill, settings?.gstPercent]);
+
+  // Auto-add the accessory the lead was interested in (once accessories load).
+  useEffect(() => {
+    if (!open || appliedAcc.current) return;
+    const want = prefill?.accessory?.trim();
+    if (!want || !accessories) return;
+    appliedAcc.current = true;
+    const acc =
+      accessories.find((a) => a.name.toLowerCase() === want.toLowerCase()) ||
+      accessories.find((a) => want.toLowerCase().includes(a.name.toLowerCase()));
+    if (acc) {
+      setItems((prev) =>
+        prev.some((i) => i.accessoryId === acc.id)
+          ? prev
+          : [...prev, { accessoryId: acc.id, name: acc.name, qty: 1, price: acc.sellPrice }],
+      );
+    }
+  }, [open, prefill?.accessory, accessories]);
 
   function addAccessoryLine(id: string) {
     if (!id) return;

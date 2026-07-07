@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { useInvoice } from "@/hooks/useInvoices";
 import { useSettings } from "@/hooks/useSettings";
@@ -12,6 +13,17 @@ import { formatMoney, formatDate } from "@/lib/utils";
 export function InvoiceDetailView({ id }: { id: string }) {
   const { data: inv, isLoading, isError } = useInvoice(id);
   const { data: settings } = useSettings();
+
+  // Auto-open the print dialog when arriving straight after creating the sale.
+  const printed = useRef(false);
+  useEffect(() => {
+    if (!inv || printed.current) return;
+    if (new URLSearchParams(window.location.search).get("print") === "1") {
+      printed.current = true;
+      const t = setTimeout(() => window.print(), 700);
+      return () => clearTimeout(t);
+    }
+  }, [inv]);
 
   if (isLoading) {
     return (

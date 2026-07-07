@@ -90,6 +90,8 @@ export function LeadsView() {
       name: lead.name,
       phone: lead.phone,
     });
+    if (lead.email) params.set("email", lead.email);
+    if (lead.accessory) params.set("accessory", lead.accessory);
     router.push(`/invoices?${params.toString()}`);
   }
 
