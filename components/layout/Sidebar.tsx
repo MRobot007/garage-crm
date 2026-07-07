@@ -64,7 +64,7 @@ export function Sidebar({ collapsed, onNavigate }: SidebarProps) {
 
       {!collapsed && (
         <p className="mt-auto px-3 pt-4 text-xs text-gray-500">
-          VOZIDEX Customs · Rajkot
+          VOZIDEX Customs · USA
         </p>
       )}
     </nav>

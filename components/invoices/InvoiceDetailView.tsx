@@ -55,7 +55,7 @@ export function InvoiceDetailView({ id }: { id: string }) {
               <h1 className="text-xl font-bold text-ink">
                 {settings?.businessName ?? "VOZIDEX"}
               </h1>
-              <p className="mt-1 text-sm text-gray-500">Rajkot, Gujarat, India</p>
+              <p className="mt-1 text-sm text-gray-500">United States</p>
             </div>
           </div>
           <div className="text-right">
