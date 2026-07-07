@@ -5,11 +5,21 @@ import { useDashboard } from "@/hooks/useDashboard";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/Card";
 import { StatCard } from "./StatCard";
-import { Funnel } from "./Funnel";
+import { DonutChart, type DonutSegment } from "./DonutChart";
 import { Badge, leadStatusTone } from "@/components/ui/Badge";
 import { Spinner } from "@/components/ui/Spinner";
 import { LEAD_STATUS_LABELS, type LeadStatus } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
+
+/** Elegant teal-forward ramp with a single warm accent for negotiation. */
+const STAGE_COLORS: Record<string, string> = {
+  New: "#64748b", // slate
+  Contacted: "#0d9488", // teal (brand)
+  TestDrive: "#0891b2", // cyan
+  Negotiation: "#f59e0b", // warm amber pop
+  Won: "#059669", // emerald — success
+  Lost: "#cbd5e1", // muted
+};
 
 export function DashboardView() {
   const { data, isLoading, isError } = useDashboard();
@@ -50,16 +60,25 @@ export function DashboardView() {
           </div>
 
           <div className="mt-6 grid gap-6 lg:grid-cols-2">
-            {/* Funnel */}
+            {/* Lead pipeline donut */}
             <Card>
               <CardHeader>
-                <CardTitle>Sales funnel</CardTitle>
+                <CardTitle>Lead pipeline</CardTitle>
                 <Link href="/leads" className="text-sm font-medium text-brand hover:underline">
                   View leads →
                 </Link>
               </CardHeader>
               <CardBody>
-                <Funnel stages={data.funnel} />
+                <DonutChart
+                  segments={data.funnel.map(
+                    (s): DonutSegment => ({
+                      label: LEAD_STATUS_LABELS[s.stage as LeadStatus] ?? s.stage,
+                      value: s.count,
+                      color: STAGE_COLORS[s.stage] ?? "#94a3b8",
+                    }),
+                  )}
+                  centerLabel="leads"
+                />
               </CardBody>
             </Card>
 

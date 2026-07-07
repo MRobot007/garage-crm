@@ -11,16 +11,16 @@ body {
   height: 100%;
 }
 
-/* Aesthetic glassmorphism backdrop: a soft, colorful gradient mesh that
-   stays fixed so frosted panels read as real glass while scrolling. */
+/* Calm, elegant glass backdrop: a soft cool mist (teal + slate) with a whisper
+   of warmth so it complements — and contrasts — the warm cream+red logo. */
 body {
   min-height: 100vh;
-  color: #1f2937;
+  color: #243b3a;
   background:
-    radial-gradient(1200px 620px at 6% -8%, rgba(129, 140, 248, 0.42), transparent 60%),
-    radial-gradient(1050px 720px at 102% -2%, rgba(217, 70, 239, 0.26), transparent 55%),
-    radial-gradient(920px 760px at 50% 116%, rgba(34, 211, 238, 0.28), transparent 55%),
-    linear-gradient(160deg, #eef2ff 0%, #f5f3ff 42%, #fdf2f8 100%);
+    radial-gradient(1150px 640px at 8% -10%, rgba(13, 148, 136, 0.14), transparent 60%),
+    radial-gradient(1000px 720px at 100% -2%, rgba(226, 88, 74, 0.07), transparent 55%),
+    radial-gradient(1000px 820px at 50% 118%, rgba(100, 116, 139, 0.12), transparent 55%),
+    linear-gradient(158deg, #f3f7f6 0%, #eef3f3 46%, #f6f3ef 100%);
   background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   font-feature-settings: "tnum" 1; /* tabular figures for money columns */
@@ -33,7 +33,7 @@ body {
     backdrop-filter: blur(20px) saturate(160%);
     -webkit-backdrop-filter: blur(20px) saturate(160%);
     border: 1px solid rgba(255, 255, 255, 0.6);
-    box-shadow: 0 12px 34px -14px rgba(49, 46, 129, 0.28);
+    box-shadow: 0 12px 34px -16px rgba(15, 60, 55, 0.22);
   }
 
   /* Lighter frost — toolbars, empty states, inset sections. */
@@ -57,7 +57,7 @@ body {
     backdrop-filter: blur(26px) saturate(165%);
     -webkit-backdrop-filter: blur(26px) saturate(165%);
     border: 1px solid rgba(255, 255, 255, 0.7);
-    box-shadow: 0 24px 60px -18px rgba(49, 46, 129, 0.4);
+    box-shadow: 0 24px 60px -20px rgba(15, 60, 55, 0.32);
   }
 
   /* Translucent form controls. Border stays visible for usability.

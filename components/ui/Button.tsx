@@ -16,7 +16,7 @@ export interface ButtonProps
 
 const VARIANTS: Record<Variant, string> = {
   primary:
-    "bg-gradient-to-b from-brand to-indigo-600 text-white shadow-md shadow-brand/25 hover:brightness-110 disabled:opacity-50 disabled:shadow-none",
+    "bg-gradient-to-b from-brand to-teal-700 text-white shadow-md shadow-brand/25 hover:brightness-[1.08] disabled:opacity-50 disabled:shadow-none",
   secondary:
     "glass-soft text-ink hover:bg-white/70 disabled:opacity-50",
   danger:

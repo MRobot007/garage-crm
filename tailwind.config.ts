@@ -1,8 +1,9 @@
 import type { Config } from "tailwindcss";
 
 /**
- * Plain, minimal design system.
- * One accent (blue), neutral grays, restrained status colors.
+ * Elegant, calm design system.
+ * Cool teal accent (complements the warm cream+red logo), soft neutrals,
+ * restrained status colors.
  */
 const config: Config = {
   content: [
@@ -14,14 +15,14 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          DEFAULT: "#2563eb", // primary blue
-          hover: "#1d4ed8",
+          DEFAULT: "#0d9488", // teal-600 — calm, elegant accent
+          hover: "#0f766e", // teal-700
         },
-        ink: "#1f2937", // primary text
-        line: "#e5e7eb", // borders
+        ink: "#243b3a", // deep teal-tinted charcoal (primary text)
+        line: "#dfe6e4", // soft cool border
         // status
-        ok: "#16a34a",
-        warn: "#d97706",
+        ok: "#0f9d76",
+        warn: "#c98a2b",
         bad: "#dc2626",
       },
       borderRadius: {
