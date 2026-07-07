@@ -4,6 +4,31 @@
 
 :root {
   color-scheme: light;
+
+  /* shadcn/ui design tokens (teal-tuned, HSL channels).
+     Additive: consumed only by the shadcn primitives in components/ui/shadcn.
+     The global `* { border-border }` base layer is intentionally omitted so
+     the existing custom design system is left completely untouched. */
+  --background: 180 22% 98%;
+  --foreground: 180 24% 18%;
+  --card: 0 0% 100%;
+  --card-foreground: 180 24% 18%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 180 24% 18%;
+  --primary: 175 84% 32%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 180 14% 94%;
+  --secondary-foreground: 180 24% 18%;
+  --muted: 180 14% 95%;
+  --muted-foreground: 195 9% 44%;
+  --accent: 175 55% 93%;
+  --accent-foreground: 175 84% 22%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 180 14% 89%;
+  --input: 180 14% 86%;
+  --ring: 175 84% 32%;
+  --radius: 0.75rem;
 }
 
 html,

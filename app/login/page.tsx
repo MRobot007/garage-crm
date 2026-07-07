@@ -1,79 +1,12 @@
-"use client";
-
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
+import { BrandPanel } from "@/components/auth/BrandPanel";
+import { LoginForm } from "@/components/auth/LoginForm";
 
 export default function LoginPage() {
-  const router = useRouter();
-  const qc = useQueryClient();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
-      if (!res.ok) {
-        const j = await res.json().catch(() => ({}));
-        setError(j.error || "Login failed");
-        setLoading(false);
-        return;
-      }
-      // Refresh the cached "me" so nav/permissions load for this user.
-      await qc.invalidateQueries();
-      const raw = new URLSearchParams(window.location.search).get("from") || "/";
-      const dest = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
-      router.replace(dest);
-      router.refresh();
-    } catch {
-      setError("Network error — is the server running?");
-      setLoading(false);
-    }
-  }
-
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <div className="glass-strong w-full max-w-sm rounded-2xl p-8">
-        <div className="mb-6 flex flex-col items-center text-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="VOZIDEX" className="mb-3 h-20 w-20 object-contain" />
-          <h1 className="text-lg font-semibold text-ink">VOZIDEX CRM</h1>
-          <p className="mt-1 text-sm text-gray-500">Sign in to your account.</p>
-        </div>
-
-        <form onSubmit={onSubmit} className="space-y-4">
-          <Input
-            label="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            autoFocus
-            autoComplete="username"
-            placeholder="e.g. owner"
-          />
-          <Input
-            type="password"
-            label="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            error={error || undefined}
-            autoComplete="current-password"
-            placeholder="••••••••"
-          />
-          <Button type="submit" loading={loading} className="w-full">
-            Sign in
-          </Button>
-        </form>
+    <div className="grid min-h-screen lg:grid-cols-[1.05fr_1fr]">
+      <BrandPanel />
+      <div className="flex items-center justify-center px-6 py-12 sm:px-10">
+        <LoginForm />
       </div>
     </div>
   );
