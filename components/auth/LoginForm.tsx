@@ -83,8 +83,8 @@ export function LoginForm() {
       {/* Mobile brand mark (brand panel is hidden < lg) */}
       <motion.div variants={item} className="mb-8 flex items-center gap-3 lg:hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="VOZIDEX" className="h-11 w-11 object-contain" />
-        <span className="text-lg font-semibold tracking-tight text-ink">VOZIDEX</span>
+        <img src="/logo.png" alt="VOZIDEX" className="h-14 w-14 object-contain" />
+        <span className="text-xl font-semibold tracking-tight text-ink">VOZIDEX</span>
       </motion.div>
 
       <motion.p

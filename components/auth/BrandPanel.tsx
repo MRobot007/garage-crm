@@ -102,9 +102,9 @@ export function BrandPanel() {
           <img
             src="/logo.png"
             alt="VOZIDEX"
-            className="h-12 w-12 rounded-xl bg-white/10 object-contain p-1.5 ring-1 ring-white/15 backdrop-blur"
+            className="h-16 w-16 object-contain drop-shadow-[0_4px_14px_rgba(0,0,0,0.35)]"
           />
-          <span className="text-lg font-semibold tracking-tight text-white">
+          <span className="text-xl font-semibold tracking-tight text-white">
             VOZIDEX
           </span>
         </motion.div>

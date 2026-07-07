@@ -41,7 +41,7 @@ export function Sidebar({ collapsed, onNavigate }: SidebarProps) {
         <img
           src="/logo.png"
           alt="VOZIDEX"
-          className="h-9 w-9 shrink-0 rounded-lg bg-white/10 object-contain p-1 ring-1 ring-white/15"
+          className="h-12 w-12 shrink-0 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
         />
         {!collapsed && (
           <span className="text-[15px] font-semibold tracking-tight text-white">
