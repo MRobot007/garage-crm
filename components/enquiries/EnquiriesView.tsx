@@ -28,7 +28,12 @@ export function EnquiriesView() {
   const del = useDeleteLead();
 
   const [toDelete, setToDelete] = useState<Lead | null>(null);
+  const [replied, setReplied] = useState<Set<string>>(new Set());
   const bodyRef = useStaggerReveal<HTMLTableSectionElement>("tr", leads?.length ?? 0);
+
+  // Replied = clicked this session, or already moved past "New".
+  const isReplied = (lead: Lead) =>
+    replied.has(lead.id) || lead.status !== "New";
 
   function requestedItem(lead: Lead): string {
     return lead.accessory || lead.interestedIn || "—";
@@ -40,7 +45,8 @@ export function EnquiriesView() {
     const item = lead.accessory || lead.interestedIn || "";
     const { subject, body } = composeEnquiryReply({ customerName: lead.name, item });
     window.open(buildGmailCompose(lead.email, subject, body), "_blank");
-    // Mark it as contacted so you can track which enquiries you've answered.
+    // Flip the button state instantly, and mark it Contacted so it persists.
+    setReplied((prev) => new Set(prev).add(lead.id));
     if (lead.status === "New") {
       updateStatus.mutate({ id: lead.id, status: "Contacted" });
     }
@@ -126,12 +132,20 @@ export function EnquiriesView() {
                 </TD>
                 <TD>
                   <div className="flex items-center justify-end gap-1">
-                    {lead.email ? (
+                    {!lead.email ? (
+                      <span className="text-xs text-gray-400">No email given</span>
+                    ) : isReplied(lead) ? (
+                      <button
+                        onClick={() => replyWeHaveIt(lead)}
+                        title="Replied — click to email again"
+                        className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[13px] font-medium text-ok hover:bg-green-50"
+                      >
+                        ✓ Replied
+                      </button>
+                    ) : (
                       <Button size="sm" onClick={() => replyWeHaveIt(lead)}>
                         ✓ We have it — email
                       </Button>
-                    ) : (
-                      <span className="text-xs text-gray-400">No email given</span>
                     )}
                     <Button
                       size="sm"
