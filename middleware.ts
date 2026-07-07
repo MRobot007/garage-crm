@@ -19,6 +19,11 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // Public: read-only endpoints the marketing website reads (e.g. accessories).
+  if (pathname.startsWith("/api/public")) {
+    return NextResponse.next();
+  }
+
   // Public: auth endpoints and the login screen.
   if (pathname.startsWith("/api/auth") || pathname === "/login") {
     return NextResponse.next();

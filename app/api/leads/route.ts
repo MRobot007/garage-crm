@@ -61,11 +61,11 @@ export async function POST(req: Request) {
       },
     });
 
-    // Auto-create a customer record (don't overwrite an existing one).
+    // Auto-create/update a customer record (fill in the email if we got one).
     await prisma.customer.upsert({
       where: { phone: v.phone },
-      update: {},
-      create: { name: v.name, phone: v.phone },
+      update: v.email ? { email: v.email } : {},
+      create: { name: v.name, phone: v.phone, email: v.email ?? null },
     });
 
     return ok(lead, 201);

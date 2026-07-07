@@ -31,6 +31,13 @@ const positiveIntFromNow = z.coerce.number().int().min(0);
 export const leadSchema = z.object({
   name: z.string().trim().min(2, "Name is required"),
   phone: phoneSchema,
+  email: z
+    .string()
+    .trim()
+    .email("Enter a valid email")
+    .optional()
+    .or(z.literal(""))
+    .transform((v) => (v ? v : undefined)),
   interestedIn: optionalStr,
   source: z.enum(LEAD_SOURCES).default("Walk-in"),
   status: z.enum(LEAD_STATUSES).default("New"),
