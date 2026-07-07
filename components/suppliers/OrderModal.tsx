@@ -13,7 +13,7 @@ import { flattenZod } from "@/lib/api";
 import {
   composeOrderBody,
   composeOrderSubject,
-  buildMailto,
+  buildGmailCompose,
 } from "@/lib/order-compose";
 import { useAccessories } from "@/hooks/useAccessories";
 import { useSettings } from "@/hooks/useSettings";
@@ -142,24 +142,36 @@ export function OrderModal({ open, onClose, supplier }: OrderModalProps) {
       return;
     }
     setErrors({});
+
+    // Pre-open a tab *synchronously* within the click so pop-up blockers allow
+    // it; we point it at Gmail once the order is saved. Closed if not needed.
+    const gmailTab = supplier.email ? window.open("", "_blank") : null;
+
     try {
       const res = await createOrder.mutateAsync(parsed.data);
       if (res.email.sent) {
+        // Already sent server-side via SMTP — no Gmail needed.
+        gmailTab?.close();
         toast.success(`Order ${res.order.orderNo} emailed to ${supplier.name}`);
       } else if (res.email.fallbackToMailto && supplier.email) {
-        // Open the owner's email app pre-filled, then mark the order Sent.
-        window.location.href = buildMailto(supplier.email, subject, body);
+        // Open Gmail compose pre-filled, then mark the order Sent.
+        const url = buildGmailCompose(supplier.email, subject, body);
+        if (gmailTab) gmailTab.location.href = url;
+        else window.open(url, "_blank");
         updateStatus.mutate({ id: res.order.id, status: "Sent" });
-        toast.info("Opening your email app to send the order…");
+        toast.success("Opening Gmail — just press Send there.");
       } else if (!res.email.supplierHasEmail) {
+        gmailTab?.close();
         toast.error(
           "Saved as a draft — add an email to this supplier to send the order.",
         );
       } else {
+        gmailTab?.close();
         toast.error(res.email.error || "Couldn't send — saved as a draft.");
       }
       onClose();
     } catch (err) {
+      gmailTab?.close();
       toast.error(err instanceof ApiError ? err.message : "Couldn't create order");
     }
   }

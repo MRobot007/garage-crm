@@ -39,7 +39,23 @@ export function composeOrderBody(params: {
   ].join("\n");
 }
 
-/** Build a mailto: URL for the fallback "open my email app" flow. */
+/** Build a Gmail compose URL — opens Gmail with To/Subject/Body pre-filled. */
+export function buildGmailCompose(
+  to: string,
+  subject: string,
+  body: string,
+): string {
+  const params = new URLSearchParams({
+    view: "cm", // compose
+    fs: "1", // full screen
+    to,
+    su: subject,
+    body,
+  });
+  return `https://mail.google.com/mail/?${params.toString()}`;
+}
+
+/** Build a mailto: URL (default mail app) — kept as a secondary fallback. */
 export function buildMailto(
   to: string,
   subject: string,

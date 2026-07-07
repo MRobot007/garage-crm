@@ -30,7 +30,7 @@ export async function PATCH(
       data: {
         status: parsed.data.status,
         ...(parsed.data.status === "Sent" && existing.emailedVia == null
-          ? { emailedVia: "mailto" }
+          ? { emailedVia: "gmail" }
           : {}),
       },
       include: ORDER_INCLUDE,

@@ -128,7 +128,7 @@ export function SupplierDetailView({ id }: { id: string }) {
                         <Badge tone={orderTone(o.status)}>{o.status}</Badge>
                         {o.emailedVia && (
                           <span className="text-xs text-gray-400">
-                            via {o.emailedVia === "smtp" ? "email" : "mail app"}
+                            via {o.emailedVia === "smtp" ? "email" : "Gmail"}
                           </span>
                         )}
                       </div>
