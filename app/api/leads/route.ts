@@ -1,8 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { ok, parseBody, handle } from "@/lib/api";
 import { leadSchema } from "@/lib/schemas";
-import { sendMail } from "@/lib/email";
-import { composeLeadAutoReply } from "@/lib/lead-autoreply";
 
 export const dynamic = "force-dynamic";
 
@@ -54,6 +52,8 @@ export async function POST(req: Request) {
       data: {
         name: v.name,
         phone: v.phone,
+        email: v.email,
+        accessory: v.accessory,
         interestedIn: v.interestedIn,
         source: v.source,
         status: v.status,
@@ -69,26 +69,6 @@ export async function POST(req: Request) {
       update: v.email ? { email: v.email } : {},
       create: { name: v.name, phone: v.phone, email: v.email ?? null },
     });
-
-    // Confirmation email to the customer — only when they gave an email AND
-    // picked an accessory we genuinely have in stock. Never fails the lead.
-    if (v.email && v.accessory) {
-      try {
-        const acc = await prisma.accessory.findFirst({
-          where: { name: v.accessory, qty: { gt: 0 } },
-          select: { name: true },
-        });
-        if (acc) {
-          const { subject, text } = composeLeadAutoReply({
-            customerName: v.name,
-            accessory: acc.name,
-          });
-          await sendMail({ to: v.email, subject, text });
-        }
-      } catch (e) {
-        console.error("[leads] auto-reply email failed:", e);
-      }
-    }
 
     return ok(lead, 201);
   });

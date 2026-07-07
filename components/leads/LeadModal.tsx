@@ -24,6 +24,7 @@ interface LeadModalProps {
 const empty = {
   name: "",
   phone: "",
+  email: "",
   interestedIn: "",
   source: "Walk-in",
   status: "New",
@@ -48,6 +49,7 @@ export function LeadModal({ open, onClose, lead }: LeadModalProps) {
         ? {
             name: lead.name,
             phone: lead.phone,
+            email: lead.email ?? "",
             interestedIn: lead.interestedIn ?? "",
             source: lead.source,
             status: lead.status,
@@ -117,7 +119,16 @@ export function LeadModal({ open, onClose, lead }: LeadModalProps) {
           value={values.phone}
           onChange={(e) => set("phone", e.target.value)}
           error={errors.phone}
-          placeholder="+91 90000 00000"
+          placeholder="+1 (555) 000-0000"
+        />
+        <Input
+          label="Email"
+          type="email"
+          value={values.email}
+          onChange={(e) => set("email", e.target.value)}
+          error={errors.email}
+          placeholder="customer@email.com"
+          className="sm:col-span-2"
         />
         <Input
           label="Interested in"

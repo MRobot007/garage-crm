@@ -4,6 +4,8 @@ export interface Lead {
   id: string;
   name: string;
   phone: string;
+  email: string | null;
+  accessory: string | null;
   interestedIn: string | null;
   source: string;
   status: string;

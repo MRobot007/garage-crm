@@ -24,6 +24,7 @@ export async function PATCH(
       data: {
         ...(v.name !== undefined && { name: v.name }),
         ...(v.phone !== undefined && { phone: v.phone }),
+        ...(v.email !== undefined && { email: v.email }),
         ...(v.interestedIn !== undefined && { interestedIn: v.interestedIn }),
         ...(v.source !== undefined && { source: v.source }),
         ...(v.status !== undefined && { status: v.status }),

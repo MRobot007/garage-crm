@@ -39,6 +39,29 @@ export function composeOrderBody(params: {
   ].join("\n");
 }
 
+/** Compose a "thanks for your enquiry — we have it" reply to a customer. */
+export function composeEnquiryReply(params: {
+  customerName: string;
+  item: string;
+}): { subject: string; body: string } {
+  const first = params.customerName.trim().split(" ")[0] || "there";
+  const item = params.item.trim() || "the item you enquired about";
+  const subject = `Thanks for your enquiry — ${item} is available at VOZIDEX`;
+  const body = [
+    `Hi ${first},`,
+    ``,
+    `Thank you for your enquiry with VOZIDEX!`,
+    ``,
+    `Great news — the ${item} you asked about is available at our shop. We'd love for you to come see it in person.`,
+    ``,
+    `Reply to this email or drop by anytime and we'll take great care of you.`,
+    ``,
+    `Warm regards,`,
+    `Team VOZIDEX`,
+  ].join("\n");
+  return { subject, body };
+}
+
 /** Build a Gmail compose URL — opens Gmail with To/Subject/Body pre-filled. */
 export function buildGmailCompose(
   to: string,
