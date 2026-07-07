@@ -14,7 +14,7 @@ function isOwnerOnly(path: string, method: string): boolean {
   );
 }
 
-// Manager + Owner (not staff): reports, suppliers, purchase orders.
+// Manager + Owner (not staff): reports, suppliers, purchase orders, audit trail.
 function isManagerUp(path: string): boolean {
   return (
     path === "/reports" ||
@@ -22,7 +22,9 @@ function isManagerUp(path: string): boolean {
     path === "/suppliers" ||
     path.startsWith("/suppliers/") ||
     path.startsWith("/api/suppliers") ||
-    path.startsWith("/api/orders")
+    path.startsWith("/api/orders") ||
+    path === "/audit" ||
+    path.startsWith("/api/audit")
   );
 }
 

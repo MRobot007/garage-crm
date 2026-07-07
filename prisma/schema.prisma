@@ -176,6 +176,23 @@ model PurchaseOrderItem {
   qty         Int           @default(1)
 }
 
+/// An immutable record of an action taken in the CRM (who did what, when).
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  userName  String   @default("System")
+  role      String   @default("system")
+  action    String // created | updated | deleted | sold | ordered | received | payment | shift_start | shift_end
+  entity    String // lead | car | accessory | invoice | order | supplier | customer | user | shift
+  entityId  String?
+  summary   String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([entity])
+  @@index([userId])
+}
+
 /// Singleton settings row (id is always "default").
 model Setting {
   id           String @id @default("default")

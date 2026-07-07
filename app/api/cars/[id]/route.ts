@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { ok, fail, parseBody, handle } from "@/lib/api";
 import { carBaseSchema } from "@/lib/schemas";
 import { serializeCar } from "@/lib/serialize";
+import { logAudit } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -62,6 +63,12 @@ export async function DELETE(
       );
     }
     await prisma.car.delete({ where: { id: params.id } });
+    await logAudit({
+      action: "deleted",
+      entity: "car",
+      entityId: params.id,
+      summary: `Deleted car ${existing.make} ${existing.model} ${existing.year} (${existing.regNo})`,
+    });
     return ok({ id: params.id });
   });
 }

@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { ok, parseBody, handle } from "@/lib/api";
 import { carSchema } from "@/lib/schemas";
 import { serializeCar } from "@/lib/serialize";
+import { logAudit } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +38,12 @@ export async function POST(req: Request) {
     if (!parsed.success) return parsed.response;
     const v = parsed.data;
     const car = await prisma.car.create({ data: { ...v, regNo: v.regNo.toUpperCase() } });
+    await logAudit({
+      action: "created",
+      entity: "car",
+      entityId: car.id,
+      summary: `Added car ${car.make} ${car.model} ${car.year} (${car.regNo})`,
+    });
     return ok(serializeCar(car), 201);
   });
 }

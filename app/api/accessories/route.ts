@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { ok, parseBody, handle } from "@/lib/api";
 import { accessorySchema } from "@/lib/schemas";
 import { serializeAccessory } from "@/lib/serialize";
+import { logAudit } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +40,12 @@ export async function POST(req: Request) {
     const v = parsed.data;
     const acc = await prisma.accessory.create({
       data: { ...v, sku: v.sku.toUpperCase() },
+    });
+    await logAudit({
+      action: "created",
+      entity: "accessory",
+      entityId: acc.id,
+      summary: `Added accessory ${acc.name} (qty ${acc.qty})`,
     });
     return ok(serializeAccessory(acc), 201);
   });

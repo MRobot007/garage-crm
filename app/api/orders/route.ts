@@ -3,6 +3,7 @@ import { ok, fail, parseBody, handle } from "@/lib/api";
 import { orderSchema } from "@/lib/schemas";
 import { serializeOrder } from "@/lib/serialize";
 import { sendMail, isEmailConfigured } from "@/lib/email";
+import { logAudit } from "@/lib/audit";
 import type { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -87,6 +88,15 @@ export async function POST(req: Request) {
         },
       },
       include: ORDER_INCLUDE,
+    });
+
+    await logAudit({
+      action: "ordered",
+      entity: "order",
+      entityId: order.id,
+      summary: `Purchase order ${order.orderNo} to ${supplier.name}: ${v.items
+        .map((i) => `${i.qty}× ${i.name}`)
+        .join(", ")}${emailResult.sent ? " (emailed)" : ""}`,
     });
 
     return ok(

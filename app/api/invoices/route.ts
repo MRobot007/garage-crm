@@ -3,6 +3,8 @@ import { ok, fail, parseBody, handle } from "@/lib/api";
 import { invoiceSchema } from "@/lib/schemas";
 import { serializeInvoice } from "@/lib/serialize";
 import { computeTotals } from "@/lib/calc";
+import { logAudit } from "@/lib/audit";
+import { formatMoney } from "@/lib/utils";
 import type { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -173,6 +175,14 @@ export async function POST(req: Request) {
         }
 
         return created;
+      });
+
+      const accCount = invoice.items.filter((i) => i.kind === "accessory").length;
+      await logAudit({
+        action: "sold",
+        entity: "invoice",
+        entityId: invoice.id,
+        summary: `Invoice ${invoice.invoiceNo} for ${invoice.customer?.name ?? "customer"} — ${formatMoney(invoice.total)}${invoice.car ? `, car ${invoice.car.make} ${invoice.car.model}` : ""}${accCount ? `, ${accCount} accessor${accCount === 1 ? "y" : "ies"}` : ""}`,
       });
 
       return ok(serializeInvoice(invoice), 201);

@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { ok, fail, parseBody, handle } from "@/lib/api";
 import { accessorySchema } from "@/lib/schemas";
 import { serializeAccessory } from "@/lib/serialize";
+import { logAudit } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -47,6 +48,12 @@ export async function DELETE(
       data: { accessoryId: null },
     });
     await prisma.accessory.delete({ where: { id: params.id } });
+    await logAudit({
+      action: "deleted",
+      entity: "accessory",
+      entityId: params.id,
+      summary: `Deleted accessory ${existing.name}`,
+    });
     return ok({ id: params.id });
   });
 }

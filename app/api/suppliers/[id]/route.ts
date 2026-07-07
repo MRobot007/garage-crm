@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { ok, fail, parseBody, handle } from "@/lib/api";
 import { supplierSchema } from "@/lib/schemas";
 import { serializeSupplier } from "@/lib/serialize";
+import { logAudit } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +65,12 @@ export async function DELETE(
     if (!existing) return fail("Supplier not found", 404);
     // Orders (and their items) cascade-delete with the supplier.
     await prisma.supplier.delete({ where: { id: params.id } });
+    await logAudit({
+      action: "deleted",
+      entity: "supplier",
+      entityId: params.id,
+      summary: `Deleted supplier ${existing.name}`,
+    });
     return ok({ id: params.id });
   });
 }

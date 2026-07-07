@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { ok, fail, parseBody, handle } from "@/lib/api";
 import { orderStatusSchema } from "@/lib/schemas";
 import { serializeOrder } from "@/lib/serialize";
+import { logAudit } from "@/lib/audit";
 import type { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -35,6 +36,12 @@ export async function PATCH(
       },
       include: ORDER_INCLUDE,
     });
+    await logAudit({
+      action: parsed.data.status === "Received" ? "received" : "updated",
+      entity: "order",
+      entityId: order.id,
+      summary: `Order ${order.orderNo} marked ${parsed.data.status}`,
+    });
     return ok(serializeOrder(order));
   });
 }
@@ -49,6 +56,12 @@ export async function DELETE(
     });
     if (!existing) return fail("Order not found", 404);
     await prisma.purchaseOrder.delete({ where: { id: params.id } });
+    await logAudit({
+      action: "deleted",
+      entity: "order",
+      entityId: params.id,
+      summary: `Deleted order ${existing.orderNo}`,
+    });
     return ok({ id: params.id });
   });
 }

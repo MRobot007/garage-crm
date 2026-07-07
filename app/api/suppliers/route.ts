@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { ok, parseBody, handle } from "@/lib/api";
 import { supplierSchema } from "@/lib/schemas";
 import { serializeSupplier } from "@/lib/serialize";
+import { logAudit } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +41,12 @@ export async function POST(req: Request) {
         notes: parsed.data.notes ?? null,
       },
       include: { _count: { select: { orders: true } } },
+    });
+    await logAudit({
+      action: "created",
+      entity: "supplier",
+      entityId: supplier.id,
+      summary: `Added supplier ${supplier.name}`,
     });
     return ok(serializeSupplier(supplier), 201);
   });

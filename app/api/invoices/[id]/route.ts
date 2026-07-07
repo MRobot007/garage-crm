@@ -2,6 +2,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { ok, fail, parseBody, handle } from "@/lib/api";
 import { serializeInvoice } from "@/lib/serialize";
+import { logAudit } from "@/lib/audit";
+import { formatMoney } from "@/lib/utils";
 import type { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -57,6 +59,12 @@ export async function PATCH(
       data: { received, status },
       include: INVOICE_INCLUDE,
     });
+    await logAudit({
+      action: "payment",
+      entity: "invoice",
+      entityId: invoice.id,
+      summary: `Payment on ${invoice.invoiceNo}: received ${formatMoney(received)} (${status})`,
+    });
     return ok(serializeInvoice(invoice));
   });
 }
@@ -93,6 +101,12 @@ export async function DELETE(
       await tx.invoice.delete({ where: { id: params.id } });
     });
 
+    await logAudit({
+      action: "deleted",
+      entity: "invoice",
+      entityId: params.id,
+      summary: `Deleted invoice ${invoice.invoiceNo}`,
+    });
     return ok({ id: params.id });
   });
 }

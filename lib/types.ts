@@ -160,6 +160,18 @@ export interface Me {
   active: boolean;
 }
 
+export interface AuditEntry {
+  id: string;
+  userId: string | null;
+  userName: string;
+  role: string;
+  action: string;
+  entity: string;
+  entityId: string | null;
+  summary: string;
+  createdAt: string;
+}
+
 export interface OrderItem {
   id: string;
   orderId: string;

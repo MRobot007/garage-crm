@@ -127,6 +127,18 @@ export const NAV_ITEMS: NavItem[] = [
     ),
   },
   {
+    href: "/audit",
+    label: "Audit Trail",
+    roles: ["owner", "manager"],
+    icon: (
+      <Svg>
+        <path d="M12 8v4l3 2" />
+        <path d="M3.05 11a9 9 0 1 1 .5 4" />
+        <path d="M3 5v4h4" />
+      </Svg>
+    ),
+  },
+  {
     href: "/team",
     label: "Team Members",
     roles: ["owner"],

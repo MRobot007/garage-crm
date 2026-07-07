@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { ok, fail, parseBody, handle } from "@/lib/api";
 import { userCreateSchema } from "@/lib/schemas";
 import { hashPassword } from "@/lib/auth";
+import { logAudit } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +44,12 @@ export async function POST(req: Request) {
         passwordHash: await hashPassword(v.password),
       },
       select: SELECT,
+    });
+    await logAudit({
+      action: "created",
+      entity: "user",
+      entityId: user.id,
+      summary: `Added ${user.role} "${user.name}" (@${user.username})`,
     });
     return ok({ ...user, createdAt: user.createdAt.toISOString() }, 201);
   });

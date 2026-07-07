@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { ok, parseBody, handle } from "@/lib/api";
 import { leadSchema } from "@/lib/schemas";
+import { logAudit } from "@/lib/audit";
+import { currentSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -68,6 +70,19 @@ export async function POST(req: Request) {
       where: { phone: v.phone },
       update: v.email ? { email: v.email } : {},
       create: { name: v.name, phone: v.phone, email: v.email ?? null },
+    });
+
+    const s = await currentSession();
+    await logAudit({
+      action: "created",
+      entity: "lead",
+      entityId: lead.id,
+      actor: s
+        ? { uid: s.uid, name: s.name, role: s.role }
+        : { name: "Website", role: "website" },
+      summary: s
+        ? `Added lead ${lead.name}`
+        : `Website enquiry from ${lead.name}${v.accessory ? ` about ${v.accessory}` : ""}`,
     });
 
     return ok(lead, 201);
