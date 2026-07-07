@@ -36,14 +36,15 @@ export async function seedDatabase(prisma: PrismaClient): Promise<void> {
 
   // ---------------- Users (bootstrap only — never wipe existing accounts) ----
   if ((await prisma.user.count()) === 0) {
+    // Demo accounts — all use the password "123456".
     await prisma.user.create({
-      data: { name: "Owner", username: "owner", role: "owner", passwordHash: await hashPassword("vozidex123") },
+      data: { name: "Owner", username: "owner", role: "owner", passwordHash: await hashPassword("123456") },
     });
     await prisma.user.create({
-      data: { name: "Sara Lee", username: "sara", role: "manager", passwordHash: await hashPassword("password") },
+      data: { name: "Sara Lee", username: "sara", role: "manager", passwordHash: await hashPassword("123456") },
     });
     await prisma.user.create({
-      data: { name: "Mike Ross", username: "mike", role: "staff", passwordHash: await hashPassword("password") },
+      data: { name: "Mike Ross", username: "mike", role: "staff", passwordHash: await hashPassword("123456") },
     });
   }
 
