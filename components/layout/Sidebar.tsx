@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS } from "./nav";
+import { useMe } from "@/hooks/useMe";
+import type { Role } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 interface SidebarProps {
@@ -18,6 +20,11 @@ function isActive(pathname: string, href: string): boolean {
 
 export function Sidebar({ collapsed, onNavigate }: SidebarProps) {
   const pathname = usePathname();
+  const { data: me } = useMe();
+  const role = me?.role as Role | undefined;
+  const items = NAV_ITEMS.filter(
+    (item) => !item.roles || (role ? item.roles.includes(role) : false),
+  );
 
   return (
     <nav
@@ -39,7 +46,7 @@ export function Sidebar({ collapsed, onNavigate }: SidebarProps) {
         )}
       </div>
 
-      {NAV_ITEMS.map((item) => {
+      {items.map((item) => {
         const active = isActive(pathname, item.href);
         return (
           <Link

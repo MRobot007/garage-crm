@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { GlobalSearch } from "./GlobalSearch";
 import { useSettings } from "@/hooks/useSettings";
+import { useMe } from "@/hooks/useMe";
+import { ROLE_LABELS, type Role } from "@/lib/constants";
 
 interface TopbarProps {
   onToggleCollapse: () => void;
@@ -12,11 +15,14 @@ interface TopbarProps {
 
 export function Topbar({ onToggleCollapse, onOpenDrawer }: TopbarProps) {
   const router = useRouter();
+  const qc = useQueryClient();
   const { data: settings } = useSettings();
+  const { data: me } = useMe();
   const [today, setToday] = useState("");
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+    qc.clear();
     router.replace("/login");
     router.refresh();
   }
@@ -64,6 +70,16 @@ export function Topbar({ onToggleCollapse, onOpenDrawer }: TopbarProps) {
       <time className="hidden shrink-0 text-sm text-gray-500 sm:block">
         {today || " "}
       </time>
+
+      {me && (
+        <div className="hidden shrink-0 border-l border-white/50 pl-3 text-right sm:block">
+          <div className="text-sm font-medium leading-tight text-ink">{me.name}</div>
+          <div className="text-xs text-gray-500">
+            {ROLE_LABELS[me.role as Role] ?? me.role}
+          </div>
+        </div>
+      )}
+
       <button
         onClick={logout}
         aria-label="Log out"

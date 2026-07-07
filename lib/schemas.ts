@@ -174,6 +174,32 @@ export const orderStatusSchema = z.object({
   status: z.enum(["Draft", "Sent", "Received"]),
 });
 
+// ----------------------------- Users ----------------------------
+export const userCreateSchema = z.object({
+  name: z.string().trim().min(2, "Name is required"),
+  username: z
+    .string()
+    .trim()
+    .min(3, "Username must be at least 3 characters")
+    .regex(/^[a-zA-Z0-9._-]+$/, "Use letters, numbers, . _ - only"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  role: z.enum(["owner", "manager", "staff"]).default("staff"),
+});
+export type UserCreateValues = z.infer<typeof userCreateSchema>;
+
+export const userUpdateSchema = z.object({
+  name: z.string().trim().min(2, "Name is required").optional(),
+  role: z.enum(["owner", "manager", "staff"]).optional(),
+  active: z.boolean().optional(),
+  password: z
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .optional()
+    .or(z.literal(""))
+    .transform((v) => (v ? v : undefined)),
+});
+export type UserUpdateValues = z.infer<typeof userUpdateSchema>;
+
 // ---------------------------- Settings --------------------------
 export const settingsSchema = z.object({
   businessName: z.string().trim().min(1, "Business name is required"),

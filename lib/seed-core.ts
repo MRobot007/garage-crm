@@ -1,5 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 import { computeTotals } from "./calc";
+import { hashPassword } from "./auth";
 
 function daysFromNow(days: number): Date {
   const d = new Date();
@@ -32,6 +33,19 @@ export async function seedDatabase(prisma: PrismaClient): Promise<void> {
     update: { businessName: "VOZIDEX", currency: "$", gstPercent: TAX },
     create: { id: "default", businessName: "VOZIDEX", currency: "$", gstPercent: TAX },
   });
+
+  // ---------------- Users (bootstrap only — never wipe existing accounts) ----
+  if ((await prisma.user.count()) === 0) {
+    await prisma.user.create({
+      data: { name: "Owner", username: "owner", role: "owner", passwordHash: await hashPassword("vozidex123") },
+    });
+    await prisma.user.create({
+      data: { name: "Sara Lee", username: "sara", role: "manager", passwordHash: await hashPassword("password") },
+    });
+    await prisma.user.create({
+      data: { name: "Mike Ross", username: "mike", role: "staff", passwordHash: await hashPassword("password") },
+    });
+  }
 
   // ---------------- Cars (odometer in miles, prices in USD) ----------------
   const cars = await Promise.all(

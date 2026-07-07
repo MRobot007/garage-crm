@@ -143,6 +143,23 @@ export interface Settings {
   gstPercent: number;
 }
 
+export interface CrmUser {
+  id: string;
+  name: string;
+  username: string;
+  role: string;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface Me {
+  id: string;
+  name: string;
+  username: string;
+  role: string;
+  active: boolean;
+}
+
 export interface OrderItem {
   id: string;
   orderId: string;

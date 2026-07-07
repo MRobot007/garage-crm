@@ -17,6 +17,8 @@ export const qk = {
   dashboard: ["dashboard"] as const,
   reports: ["reports"] as const,
   settings: ["settings"] as const,
+  users: ["users"] as const,
+  me: ["me"] as const,
 };
 
 // Entities whose changes affect dashboard/report aggregates.

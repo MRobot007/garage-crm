@@ -1,9 +1,11 @@
 import type { ReactNode } from "react";
+import type { Role } from "@/lib/constants";
 
 export interface NavItem {
   href: string;
   label: string;
   icon: ReactNode;
+  roles?: Role[]; // if set, only these roles see the item
 }
 
 const stroke = {
@@ -101,6 +103,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     href: "/suppliers",
     label: "Suppliers",
+    roles: ["owner", "manager"],
     icon: (
       <Svg>
         <path d="M3 9h13v8H3z" />
@@ -113,6 +116,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     href: "/reports",
     label: "Reports",
+    roles: ["owner", "manager"],
     icon: (
       <Svg>
         <path d="M3 3v18h18" />
@@ -123,8 +127,21 @@ export const NAV_ITEMS: NavItem[] = [
     ),
   },
   {
+    href: "/team",
+    label: "Team Members",
+    roles: ["owner"],
+    icon: (
+      <Svg>
+        <circle cx="9" cy="8" r="3" />
+        <path d="M2 20v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1" />
+        <path d="M17 11l2 2 3-3" />
+      </Svg>
+    ),
+  },
+  {
     href: "/settings",
     label: "Settings",
+    roles: ["owner"],
     icon: (
       <Svg>
         <circle cx="12" cy="12" r="3" />

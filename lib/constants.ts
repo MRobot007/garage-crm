@@ -48,6 +48,15 @@ export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
 export const ORDER_STATUSES = ["Draft", "Sent", "Received"] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
+export const ROLES = ["owner", "manager", "staff"] as const;
+export type Role = (typeof ROLES)[number];
+
+export const ROLE_LABELS: Record<Role, string> = {
+  owner: "Owner",
+  manager: "Manager",
+  staff: "Staff",
+};
+
 export const ACCESSORY_CATEGORIES = [
   "Audio",
   "Wheels",

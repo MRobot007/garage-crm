@@ -10,6 +10,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/// A CRM user (owner / manager / staff) who logs in with a username + password.
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  username     String   @unique
+  passwordHash String
+  role         String   @default("staff") // owner | manager | staff
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
 /// Sales pipeline lead.
 model Lead {
   id           String    @id @default(cuid())

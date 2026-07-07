@@ -1,22 +1,29 @@
-// Lightweight shared-password session: an HMAC-signed, expiring cookie.
-// Runs on both the Edge runtime (middleware) and Node (route handlers), so it
-// only uses Web Crypto + btoa/atob + TextEncoder — no Node-only APIs.
+// Per-user auth. HMAC-signed session cookie carrying the user id + role, plus
+// PBKDF2 password hashing. Uses only Web Crypto + btoa/atob so it works on both
+// the Edge runtime (middleware verifies the session) and Node (login/hashing).
 
 export const SESSION_COOKIE = "crm_session";
 export const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days, in seconds
 
-// Fallback keeps local dev working, but production MUST set these env vars.
-export const AUTH_SECRET = process.env.AUTH_SECRET || "dev-insecure-secret-change-me";
-export const CRM_PASSWORD = process.env.CRM_PASSWORD || "changeme";
+export const AUTH_SECRET =
+  process.env.AUTH_SECRET || "dev-insecure-secret-change-me";
+
+export type Role = "owner" | "manager" | "staff";
+
+export interface Session {
+  uid: string;
+  role: Role;
+  name: string;
+}
 
 const encoder = new TextEncoder();
+const buf = (u: Uint8Array): BufferSource => u as unknown as BufferSource;
 
 function bytesToB64url(bytes: Uint8Array): string {
   let bin = "";
   for (const b of bytes) bin += String.fromCharCode(b);
   return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
-
 function b64urlToBytes(s: string): Uint8Array {
   const b64 = s.replace(/-/g, "+").replace(/_/g, "/");
   const pad = b64.length % 4 === 0 ? "" : "=".repeat(4 - (b64.length % 4));
@@ -25,14 +32,10 @@ function b64urlToBytes(s: string): Uint8Array {
   for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
   return out;
 }
-
 const strToB64url = (s: string) => bytesToB64url(encoder.encode(s));
 const b64urlToStr = (s: string) => new TextDecoder().decode(b64urlToBytes(s));
 
-// TS 5.7+ made Uint8Array generic over its backing buffer; widen to BufferSource
-// so the Web Crypto calls type-check on both Edge and Node.
-const buf = (u: Uint8Array): BufferSource => u as unknown as BufferSource;
-
+// ─────────────────────────── session tokens ───────────────────────────
 async function hmacKey(secret: string): Promise<CryptoKey> {
   return crypto.subtle.importKey(
     "raw",
@@ -43,10 +46,12 @@ async function hmacKey(secret: string): Promise<CryptoKey> {
   );
 }
 
-/** Create a signed session token that expires SESSION_MAX_AGE from now. */
-export async function createSessionToken(secret: string): Promise<string> {
+export async function createSessionToken(
+  secret: string,
+  session: Session,
+): Promise<string> {
   const payload = strToB64url(
-    JSON.stringify({ exp: Date.now() + SESSION_MAX_AGE * 1000 }),
+    JSON.stringify({ ...session, exp: Date.now() + SESSION_MAX_AGE * 1000 }),
   );
   const sig = await crypto.subtle.sign(
     "HMAC",
@@ -56,14 +61,13 @@ export async function createSessionToken(secret: string): Promise<string> {
   return `${payload}.${bytesToB64url(new Uint8Array(sig))}`;
 }
 
-/** Verify a session token's signature and expiry. */
 export async function verifySessionToken(
   token: string | undefined,
   secret: string,
-): Promise<boolean> {
-  if (!token) return false;
+): Promise<Session | null> {
+  if (!token) return null;
   const dot = token.indexOf(".");
-  if (dot < 0) return false;
+  if (dot < 0) return null;
   const payload = token.slice(0, dot);
   const sig = token.slice(dot + 1);
 
@@ -71,31 +75,75 @@ export async function verifySessionToken(
   try {
     sigBytes = b64urlToBytes(sig);
   } catch {
-    return false;
+    return null;
   }
-
   const valid = await crypto.subtle.verify(
     "HMAC",
     await hmacKey(secret),
     buf(sigBytes),
     buf(encoder.encode(payload)),
   );
-  if (!valid) return false;
+  if (!valid) return null;
 
   try {
-    const data = JSON.parse(b64urlToStr(payload)) as { exp?: number };
-    return typeof data.exp === "number" && data.exp > Date.now();
+    const data = JSON.parse(b64urlToStr(payload)) as {
+      uid?: string;
+      role?: Role;
+      name?: string;
+      exp?: number;
+    };
+    if (typeof data.exp !== "number" || data.exp <= Date.now()) return null;
+    if (!data.uid || !data.role) return null;
+    return { uid: data.uid, role: data.role, name: data.name || "" };
   } catch {
-    return false;
+    return null;
   }
 }
 
-/** Constant-time-ish password comparison. */
-export function passwordMatches(input: string): boolean {
-  const a = encoder.encode(input);
-  const b = encoder.encode(CRM_PASSWORD);
-  if (a.length !== b.length) return false;
+// ─────────────────────────── passwords (PBKDF2) ───────────────────────────
+const PBKDF2_ITERATIONS = 100_000;
+
+async function pbkdf2(password: string, salt: Uint8Array): Promise<Uint8Array> {
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    buf(encoder.encode(password)),
+    "PBKDF2",
+    false,
+    ["deriveBits"],
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", salt: buf(salt), iterations: PBKDF2_ITERATIONS, hash: "SHA-256" },
+    keyMaterial,
+    256,
+  );
+  return new Uint8Array(bits);
+}
+
+/** Hash a password → "salt.hash" (both base64url). */
+export async function hashPassword(password: string): Promise<string> {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const hash = await pbkdf2(password, salt);
+  return `${bytesToB64url(salt)}.${bytesToB64url(hash)}`;
+}
+
+/** Verify a password against a stored "salt.hash". */
+export async function verifyPassword(
+  password: string,
+  stored: string,
+): Promise<boolean> {
+  const dot = stored.indexOf(".");
+  if (dot < 0) return false;
+  let salt: Uint8Array;
+  let expected: Uint8Array;
+  try {
+    salt = b64urlToBytes(stored.slice(0, dot));
+    expected = b64urlToBytes(stored.slice(dot + 1));
+  } catch {
+    return false;
+  }
+  const actual = await pbkdf2(password, salt);
+  if (actual.length !== expected.length) return false;
   let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
+  for (let i = 0; i < actual.length; i++) diff |= actual[i] ^ expected[i];
   return diff === 0;
 }
