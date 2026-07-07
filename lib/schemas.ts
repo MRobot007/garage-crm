@@ -38,6 +38,8 @@ export const leadSchema = z.object({
     .optional()
     .or(z.literal(""))
     .transform((v) => (v ? v : undefined)),
+  // Chosen accessory name (used to trigger the in-stock confirmation email).
+  accessory: optionalStr,
   interestedIn: optionalStr,
   source: z.enum(LEAD_SOURCES).default("Walk-in"),
   status: z.enum(LEAD_STATUSES).default("New"),

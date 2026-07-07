@@ -14,6 +14,7 @@ export interface SendResult {
   sent: boolean;
   skipped?: boolean;
   error?: string;
+  preview?: string; // Ethereal preview URL when testing
 }
 
 export async function sendMail(params: {
@@ -36,14 +37,16 @@ export async function sendMail(params: {
       },
     });
 
-    await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: process.env.SMTP_FROM || process.env.SMTP_USER,
       to: params.to,
       subject: params.subject,
       text: params.text,
       replyTo: params.replyTo,
     });
-    return { sent: true };
+    const preview = nodemailer.getTestMessageUrl(info) || undefined;
+    if (preview) console.log("[email] test preview:", preview);
+    return { sent: true, preview };
   } catch (e) {
     const error = e instanceof Error ? e.message : "Failed to send email";
     console.error("[email] send failed:", error);
