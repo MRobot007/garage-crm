@@ -30,12 +30,11 @@ export function Sidebar({ collapsed, onNavigate }: SidebarProps) {
           collapsed && "justify-center px-0",
         )}
       >
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-brand to-indigo-500 text-sm font-bold text-white shadow-md">
-          S
-        </span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo.png" alt="VOZIDEX" className="h-9 w-9 shrink-0 object-contain" />
         {!collapsed && (
           <span className="text-[15px] font-semibold tracking-tight text-ink">
-            Garage CRM
+            VOZIDEX
           </span>
         )}
       </div>
@@ -65,7 +64,7 @@ export function Sidebar({ collapsed, onNavigate }: SidebarProps) {
 
       {!collapsed && (
         <p className="mt-auto px-3 pt-4 text-xs text-gray-500">
-          Summit Auto Group · USA
+          VOZIDEX Customs · Rajkot
         </p>
       )}
     </nav>

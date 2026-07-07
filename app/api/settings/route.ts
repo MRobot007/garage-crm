@@ -6,7 +6,7 @@ import type { Settings } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 const DEFAULTS: Settings = {
-  businessName: "Garage CRM",
+  businessName: "VOZIDEX",
   currency: "$",
   gstPercent: 8,
 };

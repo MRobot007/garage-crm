@@ -165,7 +165,7 @@ model PurchaseOrderItem {
 /// Singleton settings row (id is always "default").
 model Setting {
   id           String @id @default("default")
-  businessName String @default("Garage CRM")
+  businessName String @default("VOZIDEX")
   currency     String @default("$")
   gstPercent   Int    @default(8)
 }

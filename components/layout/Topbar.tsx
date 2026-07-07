@@ -54,7 +54,7 @@ export function Topbar({ onToggleCollapse, onOpenDrawer }: TopbarProps) {
       </button>
 
       <span className="mr-1 hidden text-[15px] font-semibold tracking-tight text-ink sm:block">
-        {settings?.businessName ?? "Garage CRM"}
+        {settings?.businessName ?? "VOZIDEX"}
       </span>
 
       <div className="flex flex-1 justify-center px-2">

@@ -48,11 +48,15 @@ export function InvoiceDetailView({ id }: { id: string }) {
       <div className="print-area mx-auto max-w-3xl rounded-md border border-line bg-white p-8 shadow-sm">
         {/* Header */}
         <div className="flex items-start justify-between border-b border-line pb-6">
-          <div>
-            <h1 className="text-xl font-bold text-ink">
-              {settings?.businessName ?? "Garage CRM"}
-            </h1>
-            <p className="mt-1 text-sm text-gray-500">United States</p>
+          <div className="flex items-center gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="" className="h-14 w-14 object-contain" />
+            <div>
+              <h1 className="text-xl font-bold text-ink">
+                {settings?.businessName ?? "VOZIDEX"}
+              </h1>
+              <p className="mt-1 text-sm text-gray-500">Rajkot, Gujarat, India</p>
+            </div>
           </div>
           <div className="text-right">
             <p className="text-lg font-semibold text-ink">INVOICE</p>

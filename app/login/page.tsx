@@ -42,10 +42,9 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="glass-strong w-full max-w-sm rounded-2xl p-8">
         <div className="mb-6 flex flex-col items-center text-center">
-          <span className="mb-3 grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-brand to-indigo-500 text-lg font-bold text-white shadow-md">
-            S
-          </span>
-          <h1 className="text-lg font-semibold text-ink">Garage CRM</h1>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="VOZIDEX" className="mb-3 h-20 w-20 object-contain" />
+          <h1 className="text-lg font-semibold text-ink">VOZIDEX CRM</h1>
           <p className="mt-1 text-sm text-gray-500">
             Enter the shop password to continue.
           </p>

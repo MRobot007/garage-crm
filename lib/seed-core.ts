@@ -29,8 +29,8 @@ export async function seedDatabase(prisma: PrismaClient): Promise<void> {
 
   await prisma.setting.upsert({
     where: { id: "default" },
-    update: { businessName: "Summit Auto Group", currency: "$", gstPercent: TAX },
-    create: { id: "default", businessName: "Summit Auto Group", currency: "$", gstPercent: TAX },
+    update: { businessName: "VOZIDEX", currency: "$", gstPercent: TAX },
+    create: { id: "default", businessName: "VOZIDEX", currency: "$", gstPercent: TAX },
   });
 
   // ---------------- Cars (odometer in miles, prices in USD) ----------------

@@ -4,9 +4,9 @@ import { Providers } from "./providers";
 import { AppShell } from "@/components/layout/AppShell";
 
 export const metadata: Metadata = {
-  title: "Garage CRM",
+  title: "VOZIDEX CRM",
   description:
-    "Car Garage CRM — leads, inventory, accessories, sales & invoices, customers and reports.",
+    "VOZIDEX garage CRM — leads, inventory, accessories, sales & invoices, customers, suppliers and reports.",
 };
 
 export const viewport: Viewport = {
