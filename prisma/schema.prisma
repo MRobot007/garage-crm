@@ -94,6 +94,19 @@ model Customer {
   invoices Invoice[]
 }
 
+/// A work shift for a user; sales made during it are attributed to it.
+model Shift {
+  id        String    @id @default(cuid())
+  userId    String
+  userName  String
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([startedAt])
+}
+
 /// A sale invoice — optional single car + multiple accessory line items.
 model Invoice {
   id         String   @id @default(cuid())
@@ -102,6 +115,8 @@ model Invoice {
   customer   Customer @relation(fields: [customerId], references: [id])
   carId      String?  @unique
   car        Car?     @relation(fields: [carId], references: [id])
+  userId     String? // the user who created the sale
+  shiftId    String? // the seller's active shift at the time
   date       DateTime @default(now())
   discount   Int      @default(0)
   gstPercent Int      @default(8)

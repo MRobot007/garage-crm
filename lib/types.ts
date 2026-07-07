@@ -172,6 +172,14 @@ export interface AuditEntry {
   createdAt: string;
 }
 
+export interface ShiftEntry {
+  id: string;
+  startedAt: string;
+  endedAt: string | null;
+  salesCount: number;
+  salesTotal: number;
+}
+
 export interface OrderItem {
   id: string;
   orderId: string;

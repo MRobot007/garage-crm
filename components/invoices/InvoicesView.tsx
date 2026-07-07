@@ -21,6 +21,7 @@ import {
   useDeleteInvoice,
 } from "@/hooks/useInvoices";
 import { useStaggerReveal } from "@/hooks/useStaggerReveal";
+import { useMe } from "@/hooks/useMe";
 import { INVOICE_STATUSES } from "@/lib/constants";
 import { formatMoney, formatDate } from "@/lib/utils";
 import type { Invoice } from "@/lib/types";
@@ -30,6 +31,8 @@ export function InvoicesView() {
   const params = useSearchParams();
   const toast = useToast();
 
+  const { data: me } = useMe();
+  const canExport = me?.role === "owner" || me?.role === "manager";
   const [status, setStatus] = useState("all");
   const { data: invoices, isLoading, isError } = useInvoices(status);
   const recordPayment = useRecordPayment();
@@ -101,7 +104,19 @@ export function InvoicesView() {
       <PageHeader
         title="Sales & Invoices"
         subtitle="Create invoices, track payments and balances."
-        actions={<Button onClick={openNew}>+ New invoice</Button>}
+        actions={
+          <>
+            {canExport && (
+              <a
+                href="/api/sales/export"
+                className="glass-soft inline-flex h-10 items-center rounded-lg px-4 text-sm font-medium text-ink hover:bg-white/70"
+              >
+                ↓ Export CSV
+              </a>
+            )}
+            <Button onClick={openNew}>+ New invoice</Button>
+          </>
+        }
       />
 
       <div className="mb-4 flex flex-wrap items-end gap-3">

@@ -4,6 +4,7 @@ import { invoiceSchema } from "@/lib/schemas";
 import { serializeInvoice } from "@/lib/serialize";
 import { computeTotals } from "@/lib/calc";
 import { logAudit } from "@/lib/audit";
+import { currentSession } from "@/lib/session";
 import { formatMoney } from "@/lib/utils";
 import type { Prisma } from "@prisma/client";
 
@@ -39,6 +40,16 @@ export async function POST(req: Request) {
     const parsed = await parseBody(req, invoiceSchema);
     if (!parsed.success) return parsed.response;
     const v = parsed.data;
+
+    // Attribute the sale to the logged-in seller + their active shift (if any).
+    const session = await currentSession();
+    const activeShift = session
+      ? await prisma.shift.findFirst({
+          where: { userId: session.uid, endedAt: null },
+          orderBy: { startedAt: "desc" },
+          select: { id: true },
+        })
+      : null;
 
     try {
       const invoice = await prisma.$transaction(async (tx) => {
@@ -135,7 +146,9 @@ export async function POST(req: Request) {
             total: totals.total,
             received: v.received,
             status: totals.status,
-            staff: v.staff,
+            staff: session?.name || v.staff,
+            userId: session?.uid ?? null,
+            shiftId: activeShift?.id ?? null,
             notes: v.notes,
             items: {
               create: [
