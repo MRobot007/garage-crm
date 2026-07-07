@@ -140,3 +140,41 @@ export interface Settings {
   currency: string;
   gstPercent: number;
 }
+
+export interface OrderItem {
+  id: string;
+  orderId: string;
+  kind: string;
+  accessoryId: string | null;
+  name: string;
+  qty: number;
+}
+
+export interface PurchaseOrder {
+  id: string;
+  orderNo: string;
+  supplierId: string;
+  supplier: { id: string; name: string; email: string | null } | null;
+  date: string;
+  status: string;
+  emailTo: string | null;
+  subject: string | null;
+  body: string | null;
+  emailedVia: string | null;
+  notes: string | null;
+  items: OrderItem[];
+}
+
+export interface Supplier {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  // computed
+  orderCount: number;
+  lastOrder: string | null;
+  orders?: PurchaseOrder[];
+}

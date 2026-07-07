@@ -118,6 +118,50 @@ model InvoiceItem {
   price       Int // unit price in Rupees
 }
 
+/// A supplier the garage buys stock from.
+model Supplier {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  notes     String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders PurchaseOrder[]
+}
+
+/// A purchase order sent to a supplier (accessories to restock, cars to source).
+model PurchaseOrder {
+  id         String   @id @default(cuid())
+  orderNo    String   @unique
+  supplierId String
+  supplier   Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  date       DateTime @default(now())
+  status     String   @default("Draft") // Draft | Sent | Received
+  emailTo    String?
+  subject    String?  @db.Text
+  body       String?  @db.Text
+  emailedVia String? // smtp | mailto | null
+  notes      String?  @db.Text
+
+  items PurchaseOrderItem[]
+
+  @@index([status])
+  @@index([date])
+}
+
+/// One line on a purchase order.
+model PurchaseOrderItem {
+  id          String        @id @default(cuid())
+  orderId     String
+  order       PurchaseOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  kind        String        @default("accessory") // accessory | custom (cars/other)
+  accessoryId String? // loose reference (no FK) when kind = accessory
+  name        String
+  qty         Int           @default(1)
+}
+
 /// Singleton settings row (id is always "default").
 model Setting {
   id           String @id @default("default")

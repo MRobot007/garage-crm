@@ -19,6 +19,9 @@ export async function seedDatabase(prisma: PrismaClient): Promise<void> {
   // Clear in dependency order.
   await prisma.invoiceItem.deleteMany();
   await prisma.invoice.deleteMany();
+  await prisma.purchaseOrderItem.deleteMany();
+  await prisma.purchaseOrder.deleteMany();
+  await prisma.supplier.deleteMany();
   await prisma.car.deleteMany();
   await prisma.accessory.deleteMany();
   await prisma.customer.deleteMany();
@@ -56,6 +59,17 @@ export async function seedDatabase(prisma: PrismaClient): Promise<void> {
       { name: "Premium Car Cover", sku: "EXT-BC-PRM", category: "Exterior", qty: 1, costPrice: 35, sellPrice: 59, reorderLevel: 4, supplier: "ShineLab" },
     ].map((data) => prisma.accessory.create({ data })),
   );
+
+  // ---------------- Suppliers ----------------
+  await prisma.supplier.createMany({
+    data: [
+      { name: "SoundKing Audio", email: "orders@soundking.example.com", phone: "+1 (800) 555-0110", notes: "Head units, speakers, amplifiers." },
+      { name: "WheelCraft Supplies", email: "sales@wheelcraft.example.com", phone: "+1 (800) 555-0120", notes: "Alloy wheels and tires." },
+      { name: "AutoDecor Interiors", email: "hello@autodecor.example.com", phone: "+1 (800) 555-0130", notes: "Seat covers, mats, interior trim." },
+      { name: "GuardTech Safety", email: "orders@guardtech.example.com", phone: "+1 (800) 555-0140", notes: "Dashcams, sensors, safety gear." },
+      { name: "Midwest Auto Wholesale", email: null, phone: "+1 (312) 555-0155", notes: "Used-car sourcing partner (no email on file)." },
+    ],
+  });
 
   // ---------------- Customers (US) ----------------
   const [c1, c2, c3] = await Promise.all(

@@ -89,6 +89,18 @@ export const NAV_ITEMS: NavItem[] = [
     ),
   },
   {
+    href: "/suppliers",
+    label: "Suppliers",
+    icon: (
+      <Svg>
+        <path d="M3 9h13v8H3z" />
+        <path d="M16 12h3.5L22 15v2h-6" />
+        <circle cx="7" cy="18" r="1.6" />
+        <circle cx="18" cy="18" r="1.6" />
+      </Svg>
+    ),
+  },
+  {
     href: "/reports",
     label: "Reports",
     icon: (

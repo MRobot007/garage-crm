@@ -45,6 +45,9 @@ export type CarType = (typeof CAR_TYPES)[number];
 export const INVOICE_STATUSES = ["Paid", "Partial", "Pending"] as const;
 export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
 
+export const ORDER_STATUSES = ["Draft", "Sent", "Received"] as const;
+export type OrderStatus = (typeof ORDER_STATUSES)[number];
+
 export const ACCESSORY_CATEGORIES = [
   "Audio",
   "Wheels",

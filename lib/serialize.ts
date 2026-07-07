@@ -1,5 +1,12 @@
 // Map Prisma rows → client JSON shapes, adding computed fields.
-import type { Car, Accessory, Invoice, Customer } from "./types";
+import type {
+  Car,
+  Accessory,
+  Invoice,
+  Customer,
+  Supplier,
+  PurchaseOrder,
+} from "./types";
 import { daysSince } from "./utils";
 
 type Iso = (d: Date | null) => string | null;
@@ -76,6 +83,54 @@ export function serializeInvoice(i: any): Invoice {
       qty: it.qty,
       price: it.price,
     })),
+  };
+}
+
+export function serializeOrder(o: any): PurchaseOrder {
+  return {
+    id: o.id,
+    orderNo: o.orderNo,
+    supplierId: o.supplierId,
+    supplier: o.supplier
+      ? { id: o.supplier.id, name: o.supplier.name, email: o.supplier.email ?? null }
+      : null,
+    date: o.date.toISOString(),
+    status: o.status,
+    emailTo: o.emailTo ?? null,
+    subject: o.subject ?? null,
+    body: o.body ?? null,
+    emailedVia: o.emailedVia ?? null,
+    notes: o.notes ?? null,
+    items: (o.items ?? []).map((it: any) => ({
+      id: it.id,
+      orderId: it.orderId,
+      kind: it.kind,
+      accessoryId: it.accessoryId ?? null,
+      name: it.name,
+      qty: it.qty,
+    })),
+  };
+}
+
+export function serializeSupplier(s: any): Supplier {
+  const orders = s.orders ?? [];
+  const lastOrder =
+    orders.length > 0
+      ? orders
+          .map((o: any) => o.date)
+          .sort((a: Date, b: Date) => b.getTime() - a.getTime())[0]
+      : null;
+  return {
+    id: s.id,
+    name: s.name,
+    email: s.email ?? null,
+    phone: s.phone ?? null,
+    notes: s.notes ?? null,
+    createdAt: s.createdAt.toISOString(),
+    updatedAt: s.updatedAt.toISOString(),
+    orderCount: typeof s._count?.orders === "number" ? s._count.orders : orders.length,
+    lastOrder: lastOrder ? lastOrder.toISOString() : null,
+    orders: s.includeOrders ? orders.map(serializeOrder) : undefined,
   };
 }
 

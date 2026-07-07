@@ -128,6 +128,43 @@ export const invoiceSchema = z
 export type InvoiceInput = z.input<typeof invoiceSchema>;
 export type InvoiceValues = z.infer<typeof invoiceSchema>;
 
+// ---------------------------- Supplier --------------------------
+export const supplierSchema = z.object({
+  name: z.string().trim().min(2, "Name is required"),
+  email: z
+    .string()
+    .trim()
+    .email("Enter a valid email")
+    .optional()
+    .or(z.literal(""))
+    .transform((v) => (v ? v : undefined)),
+  phone: optionalStr,
+  notes: optionalStr,
+});
+export type SupplierValues = z.infer<typeof supplierSchema>;
+
+// ---------------------------- Order -----------------------------
+export const orderItemSchema = z.object({
+  kind: z.enum(["accessory", "custom"]).default("custom"),
+  accessoryId: optionalStr,
+  name: z.string().trim().min(1, "Item name is required"),
+  qty: z.coerce.number().int().min(1, "Qty must be at least 1"),
+});
+
+export const orderSchema = z.object({
+  supplierId: z.string().min(1, "Choose a supplier"),
+  items: z.array(orderItemSchema).min(1, "Add at least one item"),
+  subject: z.string().trim().min(1, "Subject is required"),
+  body: z.string().trim().min(1, "Message is required"),
+  notes: optionalStr,
+  send: z.boolean().default(true),
+});
+export type OrderValues = z.infer<typeof orderSchema>;
+
+export const orderStatusSchema = z.object({
+  status: z.enum(["Draft", "Sent", "Received"]),
+});
+
 // ---------------------------- Settings --------------------------
 export const settingsSchema = z.object({
   businessName: z.string().trim().min(1, "Business name is required"),
