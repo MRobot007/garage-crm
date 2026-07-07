@@ -124,6 +124,17 @@ export const NAV_ITEMS: NavItem[] = [
     ),
   },
   {
+    href: "/purchase-orders",
+    label: "Purchase Orders",
+    roles: ["owner", "manager"],
+    icon: (
+      <Svg>
+        <path d="M6 2h9l3 3v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" />
+        <path d="M9 8h6M9 12h6M9 16h4" />
+      </Svg>
+    ),
+  },
+  {
     href: "/reports",
     label: "Reports",
     roles: ["owner", "manager"],

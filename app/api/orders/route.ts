@@ -18,10 +18,17 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const supplierId = searchParams.get("supplierId");
     const status = searchParams.get("status");
+    const q = searchParams.get("q")?.trim();
     const orders = await prisma.purchaseOrder.findMany({
       where: {
         supplierId: supplierId || undefined,
         status: status || undefined,
+        OR: q
+          ? [
+              { orderNo: { contains: q } },
+              { supplier: { name: { contains: q } } },
+            ]
+          : undefined,
       },
       include: ORDER_INCLUDE,
       orderBy: { date: "desc" },

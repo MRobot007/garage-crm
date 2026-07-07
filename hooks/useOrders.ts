@@ -1,10 +1,30 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { sendJSON } from "@/lib/fetcher";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { getJSON, sendJSON } from "@/lib/fetcher";
 import type { PurchaseOrder } from "@/lib/types";
 import type { OrderValues } from "@/lib/schemas";
 import { qk } from "./keys";
+
+export interface OrderFilters {
+  status?: string;
+  q?: string;
+}
+
+export function useOrders(filters: OrderFilters = {}) {
+  const p = new URLSearchParams();
+  if (filters.status && filters.status !== "all") p.set("status", filters.status);
+  if (filters.q) p.set("q", filters.q);
+  const qs = p.toString();
+  return useQuery({
+    queryKey: [...qk.orders, filters],
+    queryFn: () => getJSON<PurchaseOrder[]>(`/api/orders${qs ? `?${qs}` : ""}`),
+  });
+}
 
 export interface CreateOrderResult {
   order: PurchaseOrder;

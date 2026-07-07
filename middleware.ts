@@ -21,6 +21,7 @@ function isManagerUp(path: string): boolean {
     path.startsWith("/api/reports") ||
     path === "/suppliers" ||
     path.startsWith("/suppliers/") ||
+    path === "/purchase-orders" ||
     path.startsWith("/api/suppliers") ||
     path.startsWith("/api/orders") ||
     path === "/audit" ||
