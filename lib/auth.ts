@@ -5,6 +5,12 @@
 export const SESSION_COOKIE = "crm_session";
 export const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days, in seconds
 
+// Session tokens are HMAC-signed with this. NEVER fall back to a literal in
+// production — an unset secret there would let anyone forge an owner session.
+// Fail closed in prod; allow a clearly-marked dev fallback locally only.
+if (process.env.NODE_ENV === "production" && !process.env.AUTH_SECRET) {
+  throw new Error("AUTH_SECRET is not set — refusing to start with an insecure fallback.");
+}
 export const AUTH_SECRET =
   process.env.AUTH_SECRET || "dev-insecure-secret-change-me";
 

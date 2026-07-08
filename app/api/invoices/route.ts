@@ -113,7 +113,10 @@ export async function POST(req: Request) {
             accessoryId: acc.id,
             name: acc.name,
             qty: item.qty,
-            price: item.price,
+            // Trust the DB sell price, never the client-submitted price, so a
+            // tampered request can't record a real item as a $1 sale.
+            // Price reductions go through the server-clamped `discount` field.
+            price: acc.sellPrice,
           });
         }
 
