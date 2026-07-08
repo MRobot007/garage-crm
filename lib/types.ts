@@ -103,7 +103,18 @@ export interface DashboardData {
     salesThisMonth: number;
     pendingPayments: number;
   };
+  /** Percent change over the last 7 days vs the prior 7 days (null when no prior data). */
+  deltas: {
+    leads: number | null;
+    sales: number | null;
+  };
+  /** Last 7 days, oldest → newest. `sales` is the invoice total for that day. */
+  trend: { label: string; leads: number; sales: number }[];
   funnel: { stage: string; count: number }[];
+  recentLeads: Pick<
+    Lead,
+    "id" | "name" | "interestedIn" | "source" | "status" | "createdAt"
+  >[];
   followUpsToday: Pick<
     Lead,
     "id" | "name" | "phone" | "interestedIn" | "status" | "followUpDate" | "staff"
