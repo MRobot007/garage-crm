@@ -130,8 +130,9 @@ input[type="number"] {
   font-family: "Oswald", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
-/* POS receipt printing — print only the receipt card. Scoped to a body class
-   toggled just before window.print() so it never affects the invoice print. */
+/* POS receipt printing — format for an 80mm thermal roll and print only the
+   receipt card. Scoped to a body class toggled just before window.print() so
+   it never affects the A4 invoice print. */
 @media print {
   body.printing-receipt * {
     visibility: hidden !important;
@@ -139,15 +140,27 @@ input[type="number"] {
   body.printing-receipt .pos-receipt,
   body.printing-receipt .pos-receipt * {
     visibility: visible !important;
+    /* Thermal printers are monochrome — force crisp black + monospace. */
+    color: #000 !important;
+    background: transparent !important;
+    font-family: "Courier New", ui-monospace, "SFMono-Regular", monospace !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
   }
   body.printing-receipt .pos-receipt {
     position: fixed !important;
     left: 0 !important;
     top: 0 !important;
-    width: 100% !important;
-    max-width: none !important;
-    box-shadow: none !important;
+    width: 80mm !important;
+    max-width: 80mm !important;
+    margin: 0 !important;
+    background: #fff !important;
     border-radius: 0 !important;
+  }
+  body.printing-receipt .pos-receipt-body {
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 3mm 3mm 8mm !important;
   }
   body.printing-receipt .pos-print-hide {
     display: none !important;

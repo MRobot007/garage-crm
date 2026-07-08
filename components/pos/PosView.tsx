@@ -284,9 +284,18 @@ export function PosView() {
   }
 
   function printReceipt() {
+    // Format the page for an 80mm thermal roll — only while printing the
+    // receipt, so the A4 invoice print is never affected.
+    const style = document.createElement("style");
+    style.id = "receipt-page-size";
+    style.textContent = "@page { size: 80mm auto; margin: 0 }";
+    document.head.appendChild(style);
     document.body.classList.add("printing-receipt");
     window.print();
-    window.setTimeout(() => document.body.classList.remove("printing-receipt"), 600);
+    window.setTimeout(() => {
+      document.body.classList.remove("printing-receipt");
+      document.getElementById("receipt-page-size")?.remove();
+    }, 600);
   }
 
   const categories = ["Everything", ...ACCESSORY_CATEGORIES, SERVICES_CAT];
@@ -680,7 +689,7 @@ export function PosView() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               className="pos-receipt w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl"
             >
-              <div className="max-h-[80vh] overflow-y-auto p-6">
+              <div className="pos-receipt-body max-h-[80vh] overflow-y-auto p-6">
                 <div className="mb-4 text-center">
                   <p className={cn(displayFont.className, "text-2xl font-bold uppercase tracking-wide text-ink")}>
                     {businessName}
