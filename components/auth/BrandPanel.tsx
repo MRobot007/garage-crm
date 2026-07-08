@@ -4,6 +4,9 @@ import { useEffect, useRef } from "react";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { gsap } from "gsap";
 import { Gauge, ShieldCheck, ReceiptText, Sparkles } from "lucide-react";
+import { displayFont } from "@/lib/fonts";
+
+const HEADLINE = "Run the whole dealership from one calm screen.";
 
 const FEATURES = [
   { icon: Gauge, title: "Real-time pipeline", copy: "Leads, follow-ups and stock at a glance." },
@@ -67,6 +70,19 @@ export function BrandPanel() {
     hidden: { opacity: 0, y: reduce ? 0 : 16 },
     show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } },
   };
+  const wordWrap: Variants = {
+    hidden: {},
+    show: { transition: { staggerChildren: 0.05, delayChildren: 0.3 } },
+  };
+  const word: Variants = {
+    hidden: { opacity: 0, y: reduce ? 0 : 20, filter: reduce ? "none" : "blur(6px)" },
+    show: {
+      opacity: 1,
+      y: 0,
+      filter: "blur(0px)",
+      transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] },
+    },
+  };
 
   return (
     <div
@@ -97,14 +113,26 @@ export function BrandPanel() {
         animate="show"
         className="relative z-10 flex h-full flex-col justify-between p-12 xl:p-16"
       >
-        <motion.div variants={item} className="flex items-center gap-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/logo.png"
-            alt="VOZIDEX"
-            className="h-16 w-16 object-contain drop-shadow-[0_4px_14px_rgba(0,0,0,0.35)]"
-          />
-          <span className="text-xl font-semibold tracking-tight text-white">
+        <motion.div variants={item} className="flex items-center gap-4">
+          <motion.div
+            className="relative"
+            animate={reduce ? undefined : { y: [0, -7, 0] }}
+            transition={
+              reduce ? undefined : { duration: 5, repeat: Infinity, ease: "easeInOut" }
+            }
+          >
+            {/* soft brand glow behind the mark */}
+            <div className="absolute inset-0 rounded-full bg-teal-300/25 blur-2xl" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo.png"
+              alt="VOZIDEX"
+              className="relative h-28 w-28 object-contain drop-shadow-[0_8px_22px_rgba(0,0,0,0.45)]"
+            />
+          </motion.div>
+          <span
+            className={`${displayFont.className} -skew-x-6 text-4xl font-bold uppercase tracking-[0.06em] text-white`}
+          >
             VOZIDEX
           </span>
         </motion.div>
@@ -118,10 +146,14 @@ export function BrandPanel() {
             Dealership operations, refined
           </motion.div>
           <motion.h1
-            variants={item}
-            className="max-w-md text-4xl font-semibold leading-[1.1] tracking-tight text-white xl:text-5xl"
+            variants={wordWrap}
+            className={`${displayFont.className} max-w-lg text-5xl font-semibold uppercase leading-[1.03] tracking-tight text-white xl:text-6xl`}
           >
-            Run the whole garage from one calm screen.
+            {HEADLINE.split(" ").map((w, i) => (
+              <motion.span key={i} variants={word} className="mr-[0.26em] inline-block">
+                {w}
+              </motion.span>
+            ))}
           </motion.h1>
           <motion.p
             variants={item}

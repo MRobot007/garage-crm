@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/shadcn/input";
 import { Label } from "@/components/ui/shadcn/label";
 import { buttonVariants } from "@/components/ui/shadcn/button";
 import { cn } from "@/lib/shadcn";
+import { displayFont } from "@/lib/fonts";
 
 // Show the one-tap demo credentials on the login page. Set
 // NEXT_PUBLIC_DEMO_LOGIN=off in the environment to hide it for a real launch.
@@ -87,19 +88,23 @@ export function LoginForm() {
       {/* Mobile brand mark (brand panel is hidden < lg) */}
       <motion.div variants={item} className="mb-8 flex items-center gap-3 lg:hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="VOZIDEX" className="h-14 w-14 object-contain" />
-        <span className="text-xl font-semibold tracking-tight text-ink">VOZIDEX</span>
+        <img src="/logo.png" alt="VOZIDEX" className="h-16 w-16 object-contain" />
+        <span
+          className={`${displayFont.className} -skew-x-6 text-2xl font-bold uppercase tracking-[0.06em] text-ink`}
+        >
+          VOZIDEX
+        </span>
       </motion.div>
 
       <motion.p
         variants={item}
-        className="text-xs font-semibold uppercase tracking-[0.18em] text-brand"
+        className="text-xs font-semibold uppercase tracking-[0.2em] text-brand"
       >
         Welcome back
       </motion.p>
       <motion.h1
         variants={item}
-        className="mt-2 text-[26px] font-semibold tracking-tight text-ink"
+        className={`${displayFont.className} mt-2 text-4xl font-semibold uppercase leading-[1.05] tracking-tight text-ink`}
       >
         Sign in to your workspace
       </motion.h1>
