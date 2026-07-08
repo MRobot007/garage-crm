@@ -9,6 +9,7 @@ import {
   DollarSign,
   Wallet,
   ArrowRight,
+  Store,
 } from "lucide-react";
 import { useDashboard } from "@/hooks/useDashboard";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -42,6 +43,15 @@ export function DashboardView() {
       <PageHeader
         title="Dashboard"
         subtitle="A quick pulse of the garage — leads, stock, sales and payments."
+        actions={
+          <Link
+            href="/pos"
+            className="inline-flex h-10 items-center gap-2 rounded-lg bg-gradient-to-b from-brand to-teal-700 px-4 text-sm font-semibold text-white shadow-md shadow-brand/25 transition-all hover:brightness-[1.08] active:scale-[0.97]"
+          >
+            <Store className="h-4 w-4" />
+            Launch POS
+          </Link>
+        }
       />
 
       {isLoading && <DashboardSkeleton />}
