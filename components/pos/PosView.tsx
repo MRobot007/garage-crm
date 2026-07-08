@@ -93,7 +93,8 @@ export function PosView() {
   const taxPct = settings?.gstPercent ?? 8;
   const businessName = settings?.businessName ?? "VOZIDEX";
 
-  const [navOpen, setNavOpen] = useState(true);
+  const [navOpen, setNavOpen] = useState(true); // desktop in-flow sidebar
+  const [navDrawer, setNavDrawer] = useState(false); // mobile nav drawer
   const [cartOpen, setCartOpen] = useState(false); // mobile cart sheet
   const [category, setCategory] = useState("Everything");
   const [q, setQ] = useState("");
@@ -382,11 +383,20 @@ export function PosView() {
         <header className="shrink-0 border-b border-line/70 px-5 py-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
+              {/* Mobile: open the nav drawer */}
+              <button
+                onClick={() => setNavDrawer(true)}
+                aria-label="Open navigation"
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-slate-600 transition-colors hover:bg-slate-500/10 hover:text-ink md:hidden"
+              >
+                <Menu className="h-5 w-5" />
+              </button>
+              {/* Desktop: collapse the in-flow sidebar */}
               <button
                 onClick={() => setNavOpen((o) => !o)}
                 aria-label="Toggle navigation"
                 title="Toggle navigation"
-                className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-slate-600 transition-colors hover:bg-slate-500/10 hover:text-ink"
+                className="hidden h-9 w-9 shrink-0 place-items-center rounded-lg text-slate-600 transition-colors hover:bg-slate-500/10 hover:text-ink md:grid"
               >
                 <Menu className="h-5 w-5" />
               </button>
@@ -764,6 +774,28 @@ export function PosView() {
             {formatMoney(total)} · View cart
           </span>
         </button>
+      )}
+
+      {/* Mobile navigation drawer (the hamburger opens this on phones) */}
+      {navDrawer && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setNavDrawer(false)}
+            aria-hidden
+          />
+          <aside className="absolute left-0 top-0 flex h-full w-64 flex-col bg-[linear-gradient(180deg,#0c4a45_0%,#0a3a37_50%,#062725_100%)] shadow-2xl">
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <Sidebar collapsed={false} onNavigate={() => setNavDrawer(false)} />
+            </div>
+            <button
+              onClick={logout}
+              className="flex items-center gap-3 border-t border-white/10 px-6 py-3 text-sm font-medium text-teal-50/70 transition-colors hover:bg-white/10 hover:text-white"
+            >
+              <LogOut className="h-5 w-5" /> Log out
+            </button>
+          </aside>
+        </div>
       )}
 
       {/* Receipt after a completed sale */}
