@@ -1,11 +1,5 @@
-import { Oswald } from "next/font/google";
-
-/**
- * Condensed, industrial display face — echoes the bold, sporty VOZIDEX logo.
- * Used for the brand wordmark and headline lockups (not body text).
- */
-export const displayFont = Oswald({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  display: "swap",
-});
+// Condensed, industrial display face (Oswald) — echoes the bold, sporty VOZIDEX
+// logo. Loaded at runtime via a <link> in app/layout.tsx and mapped to the
+// `.font-display` class in globals.css. We load it this way (instead of a
+// build-time next/font fetch) so a font-CDN hiccup can never fail the CI build.
+export const displayFont = { className: "font-display" } as const;

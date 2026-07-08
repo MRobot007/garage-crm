@@ -125,6 +125,11 @@ input[type="number"] {
   -webkit-overflow-scrolling: touch;
 }
 
+/* Brand display face (loaded via the <link> in the root layout). */
+.font-display {
+  font-family: "Oswald", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
 /* Skeleton loading placeholder — a soft teal block with a light sweep. */
 .skeleton {
   position: relative;
