@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Download } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { TableWrap, THead, TH, TBody, TR, TD } from "@/components/ui/Table";
@@ -87,6 +88,7 @@ export function TeamView() {
               <TH>Role</TH>
               <TH>Status</TH>
               <TH>Added</TH>
+              <TH>Sales CSV</TH>
               <TH className="text-right">Actions</TH>
             </tr>
           </THead>
@@ -113,6 +115,17 @@ export function TeamView() {
                   )}
                 </TD>
                 <TD className="whitespace-nowrap text-gray-600">{formatDate(u.createdAt)}</TD>
+                <TD>
+                  <a
+                    href={`/api/users/${u.id}/export`}
+                    download
+                    className="inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-[13px] font-medium text-brand transition-colors hover:bg-brand/10"
+                    title={`Download ${u.name}'s sales as CSV`}
+                  >
+                    <Download className="h-4 w-4" />
+                    Download
+                  </a>
+                </TD>
                 <TD>
                   <div className="flex items-center justify-end gap-1">
                     <Button size="sm" variant="ghost" onClick={() => { setEditing(u); setModalOpen(true); }}>
