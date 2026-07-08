@@ -283,14 +283,37 @@ export function PosView() {
     }
   }
 
+  // Measure the receipt at 80mm width (thermal roll) and return its height in mm,
+  // so we can size the print PAGE exactly to the bill (a vertical rectangle,
+  // not an A4 sheet). `size: 80mm auto` is invalid CSS, so we need a real height.
+  function measureReceiptMm(): number {
+    const src = document.querySelector<HTMLElement>(".pos-receipt-body");
+    if (!src) return 150;
+    try {
+      const clone = src.cloneNode(true) as HTMLElement;
+      clone.style.cssText =
+        "position:absolute;left:-10000px;top:0;width:80mm;max-height:none;overflow:visible;box-sizing:border-box;padding:3mm 3mm 8mm;font-family:'Courier New',monospace;";
+      document.body.appendChild(clone);
+      clone.querySelectorAll<HTMLElement>("*").forEach((el) => {
+        el.style.fontFamily = "'Courier New', monospace";
+      });
+      const px = clone.offsetHeight;
+      clone.remove();
+      // 96px = 25.4mm; add a small buffer so nothing spills to a 2nd page.
+      return Math.max(70, Math.ceil((px * 25.4) / 96) + 4);
+    } catch {
+      return 150;
+    }
+  }
+
   function printReceipt() {
-    // Format the page for an 80mm thermal roll — only while printing the
-    // receipt, so the A4 invoice print is never affected. Cleanup runs on
-    // `afterprint` (NOT a timer) so the bill-sized @page stays applied for the
-    // entire print preview — window.print() returns immediately.
+    // Size the page to the measured bill height, only while printing the
+    // receipt (A4 invoice print is untouched). Cleanup on `afterprint`, not a
+    // timer, so the page size stays applied for the whole preview.
+    const heightMm = measureReceiptMm();
     const style = document.createElement("style");
     style.id = "receipt-page-size";
-    style.textContent = "@page { size: 80mm auto; margin: 0 }";
+    style.textContent = `@page { size: 80mm ${heightMm}mm; margin: 0 }`;
     document.head.appendChild(style);
     document.body.classList.add("printing-receipt");
     const cleanup = () => {
