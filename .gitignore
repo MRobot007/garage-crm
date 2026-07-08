@@ -34,3 +34,10 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+
+# stray curl cookie jars
+cj
+cjo
+cjs
+cookies
