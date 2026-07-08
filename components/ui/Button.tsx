@@ -1,7 +1,7 @@
 "use client";
 
 import { forwardRef } from "react";
-import { cn } from "@/lib/utils";
+import { cn, prefersReducedMotion } from "@/lib/utils";
 import { Spinner } from "./Spinner";
 
 type Variant = "primary" | "secondary" | "danger" | "ghost";
@@ -31,21 +31,50 @@ const SIZES: Record<Size, string> = {
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   function Button(
-    { variant = "primary", size = "md", loading, className, children, disabled, ...rest },
+    {
+      variant = "primary",
+      size = "md",
+      loading,
+      className,
+      children,
+      disabled,
+      onMouseMove,
+      onMouseLeave,
+      ...rest
+    },
     ref,
   ) {
+    // Magnetic pull toward the cursor (desktop; skipped for reduced-motion).
+    function handleMove(e: React.MouseEvent<HTMLButtonElement>) {
+      const el = e.currentTarget;
+      if (!disabled && !loading && !prefersReducedMotion()) {
+        const r = el.getBoundingClientRect();
+        const mx = e.clientX - (r.left + r.width / 2);
+        const my = e.clientY - (r.top + r.height / 2);
+        el.style.transform = `translate(${mx * 0.12}px, ${my * 0.18}px)`;
+      }
+      onMouseMove?.(e);
+    }
+    function handleLeave(e: React.MouseEvent<HTMLButtonElement>) {
+      e.currentTarget.style.transform = "";
+      onMouseLeave?.(e);
+    }
+
     return (
       <button
         ref={ref}
         disabled={disabled || loading}
+        onMouseMove={handleMove}
+        onMouseLeave={handleLeave}
         className={cn(
-          "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all active:scale-[0.97] disabled:cursor-not-allowed disabled:active:scale-100",
+          "group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-lg font-medium transition-all active:scale-[0.97] disabled:cursor-not-allowed disabled:active:scale-100",
           VARIANTS[variant],
           SIZES[size],
           className,
         )}
         {...rest}
       >
+        {variant === "primary" && <span className="fx-sheen" aria-hidden />}
         {loading && <Spinner size={size === "sm" ? 14 : 16} />}
         {children}
       </button>

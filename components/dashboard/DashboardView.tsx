@@ -18,6 +18,7 @@ import { StatCard } from "./StatCard";
 import { DonutChart, type DonutSegment } from "./DonutChart";
 import { TrendChart } from "./TrendChart";
 import { DashboardSkeleton } from "./DashboardSkeleton";
+import { Reveal } from "@/components/ui/Reveal";
 import { Badge, leadStatusTone } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { LEAD_STATUS_LABELS, type LeadStatus } from "@/lib/constants";
@@ -147,14 +148,14 @@ export function DashboardView() {
           </motion.div>
 
           {/* Trend chart + pipeline donut */}
-          <div className="mt-6 grid gap-6 lg:grid-cols-3">
-            <Card className="lg:col-span-2">
+          <Reveal className="mt-6 grid gap-6 lg:grid-cols-3">
+            <Card className="lg:col-span-2 fx-ring">
               <CardBody>
                 <TrendChart data={data.trend} />
               </CardBody>
             </Card>
 
-            <Card>
+            <Card className="fx-ring">
               <CardHeader>
                 <CardTitle>Lead pipeline</CardTitle>
                 <Link href="/leads" className="text-sm font-medium text-brand hover:underline">
@@ -174,10 +175,10 @@ export function DashboardView() {
                 />
               </CardBody>
             </Card>
-          </div>
+          </Reveal>
 
           {/* Recent leads + follow-ups */}
-          <div className="mt-6 grid gap-6 lg:grid-cols-3">
+          <Reveal className="mt-6 grid gap-6 lg:grid-cols-3">
             <Card className="lg:col-span-2">
               <CardHeader>
                 <div>
@@ -269,10 +270,11 @@ export function DashboardView() {
                 )}
               </CardBody>
             </Card>
-          </div>
+          </Reveal>
 
           {/* Low stock */}
-          <Card className="mt-6">
+          <Reveal>
+          <Card className="mt-6 fx-ring">
             <CardHeader>
               <CardTitle>Low-stock accessories</CardTitle>
               <Link href="/accessories" className="text-sm font-medium text-brand hover:underline">
@@ -301,6 +303,7 @@ export function DashboardView() {
               )}
             </CardBody>
           </Card>
+          </Reveal>
         </>
       )}
     </div>

@@ -1,11 +1,36 @@
+"use client";
+
+import { useRef } from "react";
 import { cn } from "@/lib/utils";
 
 export function Card({
   className,
+  children,
+  onMouseMove,
   ...rest
 }: React.HTMLAttributes<HTMLDivElement>) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  function handleMove(e: React.MouseEvent<HTMLDivElement>) {
+    const el = ref.current;
+    if (el) {
+      const r = el.getBoundingClientRect();
+      el.style.setProperty("--mx", `${e.clientX - r.left}px`);
+      el.style.setProperty("--my", `${e.clientY - r.top}px`);
+    }
+    onMouseMove?.(e);
+  }
+
   return (
-    <div className={cn("glass rounded-2xl", className)} {...rest} />
+    <div
+      ref={ref}
+      onMouseMove={handleMove}
+      className={cn("glass spotlight rounded-2xl", className)}
+      {...rest}
+    >
+      <span className="spotlight-glow" aria-hidden />
+      {children}
+    </div>
   );
 }
 

@@ -32,7 +32,7 @@ import { useMe } from "@/hooks/useMe";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { useToast } from "@/components/ui/Toast";
 import { ACCESSORY_CATEGORIES } from "@/lib/constants";
-import { formatMoney, cn } from "@/lib/utils";
+import { formatMoney, cn, prefersReducedMotion } from "@/lib/utils";
 import { ApiError } from "@/lib/fetcher";
 import { displayFont } from "@/lib/fonts";
 import type { Accessory } from "@/lib/types";
@@ -81,6 +81,21 @@ interface CompletedSale {
 }
 
 const QUICK_CASH = [10, 20, 50, 100];
+
+/** Cursor spotlight + subtle 3D tilt for a product card (attach directly). */
+function tiltMove(e: React.MouseEvent<HTMLElement>) {
+  const el = e.currentTarget;
+  const r = el.getBoundingClientRect();
+  const px = (e.clientX - r.left) / r.width;
+  const py = (e.clientY - r.top) / r.height;
+  el.style.setProperty("--mx", `${e.clientX - r.left}px`);
+  el.style.setProperty("--my", `${e.clientY - r.top}px`);
+  if (prefersReducedMotion()) return;
+  el.style.transform = `perspective(700px) rotateX(${(0.5 - py) * 5}deg) rotateY(${(px - 0.5) * 5}deg) translateY(-3px)`;
+}
+function tiltLeave(e: React.MouseEvent<HTMLElement>) {
+  e.currentTarget.style.transform = "";
+}
 
 export function PosView() {
   const router = useRouter();
@@ -488,8 +503,11 @@ export function PosView() {
                 <button
                   key={s.name}
                   onClick={() => addService(s.name, s.price)}
-                  className="glass group flex flex-col rounded-2xl p-3 text-left transition-transform hover:-translate-y-0.5"
+                  onMouseMove={tiltMove}
+                  onMouseLeave={tiltLeave}
+                  className="glass spotlight fx-ring group flex flex-col rounded-2xl p-3 text-left transition-transform"
                 >
+                  <span className="spotlight-glow" aria-hidden />
                   <div className="mb-3 flex items-center justify-between">
                     <span className="rounded-md bg-brand/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-brand">
                       Service
@@ -513,11 +531,14 @@ export function PosView() {
                     key={a.id}
                     onClick={() => addAccessory(a)}
                     disabled={out}
+                    onMouseMove={out ? undefined : tiltMove}
+                    onMouseLeave={out ? undefined : tiltLeave}
                     className={cn(
                       "glass group flex flex-col rounded-2xl p-3 text-left transition-transform",
-                      out ? "cursor-not-allowed opacity-50" : "hover:-translate-y-0.5",
+                      out ? "cursor-not-allowed opacity-50" : "spotlight fx-ring",
                     )}
                   >
+                    {!out && <span className="spotlight-glow" aria-hidden />}
                     <div className="mb-3 flex items-center justify-between">
                       <span
                         className={cn(

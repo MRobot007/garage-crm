@@ -199,10 +199,12 @@ input[type="number"] {
    JS sets --mx/--my; the glow only shows on hover. */
 .spotlight {
   position: relative;
+  isolation: isolate;
 }
 .spotlight-glow {
   position: absolute;
   inset: 0;
+  z-index: -1; /* behind card content, above the card's own background */
   border-radius: inherit;
   pointer-events: none;
   opacity: 0;
@@ -228,9 +230,95 @@ input[type="number"] {
     0 0 0 1px rgba(13, 148, 136, 0.12);
 }
 
+/* Animated conic gradient border ring (shows on hover). */
+@property --fx-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+.fx-ring {
+  position: relative;
+}
+.fx-ring::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--fx-angle),
+    transparent 0%,
+    rgba(20, 184, 166, 0.7) 12%,
+    rgba(34, 211, 238, 0.6) 22%,
+    transparent 40%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.fx-ring:hover::after {
+  opacity: 1;
+  animation: fxSpin 3s linear infinite;
+}
+@keyframes fxSpin {
+  to { --fx-angle: 360deg; }
+}
+
+/* Shine sweep for primary buttons. */
+.fx-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+.fx-sheen::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 60%;
+  transform: translateX(-160%) skewX(-20deg);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.35),
+    transparent
+  );
+  transition: transform 0.7s ease;
+}
+.group:hover .fx-sheen::before {
+  transform: translateX(260%) skewX(-20deg);
+}
+
+/* Scroll-reveal: fade + rise as the element enters the viewport. */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+.reveal-in {
+  opacity: 1;
+  transform: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .atmos-blob { animation: none !important; }
   .hoverglow:hover { transform: none; }
+  .fx-ring:hover::after { animation: none; }
+  .fx-sheen::before { transition: none; }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 
 /* POS receipt printing — format for an 80mm thermal roll and print only the

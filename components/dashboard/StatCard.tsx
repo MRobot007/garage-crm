@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { TrendingUp, TrendingDown } from "lucide-react";
 import { useCountUp } from "@/hooks/useCountUp";
+import { useTilt } from "@/hooks/useTilt";
 import { formatMoney, formatNumber, cn } from "@/lib/utils";
 
 type Accent = "teal" | "emerald" | "cyan" | "amber" | "violet" | "rose";
@@ -57,21 +58,12 @@ export function StatCard({
   const display = format === "inr" ? formatMoney(n) : formatNumber(n);
   const a = ACCENTS[accent];
   const fill = progress === undefined ? 1 : Math.max(0, Math.min(1, progress));
-  const ref = useRef<HTMLDivElement>(null);
-
-  function onMove(e: React.MouseEvent<HTMLDivElement>) {
-    const el = ref.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    el.style.setProperty("--mx", `${e.clientX - r.left}px`);
-    el.style.setProperty("--my", `${e.clientY - r.top}px`);
-  }
+  const tilt = useTilt(7);
 
   return (
     <div
-      ref={ref}
-      onMouseMove={onMove}
-      className="glass spotlight relative flex flex-col gap-4 overflow-hidden rounded-2xl p-5 transition-transform duration-200 hover:-translate-y-1"
+      {...tilt}
+      className="glass spotlight fx-ring flex flex-col gap-4 rounded-2xl p-5 transition-transform duration-200"
     >
       <span className="spotlight-glow" aria-hidden />
       <div className="relative flex items-start justify-between">
