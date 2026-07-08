@@ -1,13 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ShoppingCart,
   History,
-  Home,
   LogOut,
   Search,
   Plus,
@@ -29,6 +27,7 @@ import { useAccessories } from "@/hooks/useAccessories";
 import { useSettings } from "@/hooks/useSettings";
 import { useCreateInvoice } from "@/hooks/useInvoices";
 import { useMe } from "@/hooks/useMe";
+import { Sidebar } from "@/components/layout/Sidebar";
 import { useToast } from "@/components/ui/Toast";
 import { ACCESSORY_CATEGORIES } from "@/lib/constants";
 import { formatMoney, cn } from "@/lib/utils";
@@ -329,26 +328,16 @@ export function PosView() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-[linear-gradient(158deg,#f3f7f6_0%,#eef3f3_46%,#f6f3ef_100%)] text-ink">
-      {/* Icon rail */}
-      <aside className="flex w-16 shrink-0 flex-col items-center gap-1 bg-[linear-gradient(180deg,#0c4a45_0%,#0a3a37_50%,#062725_100%)] py-4 text-teal-100">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="VOZIDEX" className="mb-3 h-10 w-10 object-contain" />
-        <RailButton label="Register" active icon={<ShoppingCart className="h-5 w-5" />} />
-        <RailLink
-          href={me?.role === "staff" ? "/leads" : "/"}
-          label={me?.role === "staff" ? "Home" : "Dashboard"}
-          icon={<Home className="h-5 w-5" />}
-        />
-        {me?.role !== "staff" && (
-          <RailLink href="/invoices" label="Sales history" icon={<History className="h-5 w-5" />} />
-        )}
-        <RailLink href="/accessories" label="Inventory" icon={<Package className="h-5 w-5" />} />
+      {/* Full navigation sidebar — every section the user can access. */}
+      <aside className="hidden w-60 shrink-0 flex-col bg-[linear-gradient(180deg,#0c4a45_0%,#0a3a37_50%,#062725_100%)] md:flex">
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <Sidebar collapsed={false} />
+        </div>
         <button
           onClick={logout}
-          title="Log out"
-          className="mt-auto grid h-11 w-11 place-items-center rounded-xl text-teal-100/70 transition-colors hover:bg-white/10 hover:text-white"
+          className="flex items-center gap-3 border-t border-white/10 px-6 py-3 text-sm font-medium text-teal-50/70 transition-colors hover:bg-white/10 hover:text-white"
         >
-          <LogOut className="h-5 w-5" />
+          <LogOut className="h-5 w-5" /> Log out
         </button>
       </aside>
 
@@ -837,48 +826,6 @@ export function PosView() {
         )}
       </AnimatePresence>
     </div>
-  );
-}
-
-function RailButton({
-  icon,
-  label,
-  active,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  active?: boolean;
-}) {
-  return (
-    <span
-      title={label}
-      className={cn(
-        "grid h-11 w-11 place-items-center rounded-xl",
-        active ? "bg-white/15 text-white ring-1 ring-inset ring-white/15" : "text-teal-100/70",
-      )}
-    >
-      {icon}
-    </span>
-  );
-}
-
-function RailLink({
-  href,
-  icon,
-  label,
-}: {
-  href: string;
-  icon: React.ReactNode;
-  label: string;
-}) {
-  return (
-    <Link
-      href={href}
-      title={label}
-      className="grid h-11 w-11 place-items-center rounded-xl text-teal-100/70 transition-colors hover:bg-white/10 hover:text-white"
-    >
-      {icon}
-    </Link>
   );
 }
 
