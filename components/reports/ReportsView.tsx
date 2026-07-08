@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Download } from "lucide-react";
 import { useReports } from "@/hooks/useReports";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -36,6 +37,17 @@ export function ReportsView() {
       <PageHeader
         title="Reports"
         subtitle={`Business snapshot · ${data.month}`}
+        actions={
+          <a
+            href="/api/reports/export"
+            download
+            className="inline-flex h-10 items-center gap-2 rounded-lg bg-gradient-to-b from-brand to-teal-700 px-4 text-sm font-medium text-white shadow-md shadow-brand/25 transition-all hover:brightness-[1.08]"
+            title="Download the business snapshot as CSV"
+          >
+            <Download className="h-4 w-4" />
+            Download CSV
+          </a>
+        }
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
