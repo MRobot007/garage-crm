@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Mail } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -17,10 +18,47 @@ import {
   useAdjustStock,
   useDeleteAccessory,
 } from "@/hooks/useAccessories";
+import { useSuppliers } from "@/hooks/useSuppliers";
+import { useSettings } from "@/hooks/useSettings";
 import { useStaggerReveal } from "@/hooks/useStaggerReveal";
+import { buildGmailCompose } from "@/lib/order-compose";
 import { ACCESSORY_CATEGORIES } from "@/lib/constants";
 import { formatMoney } from "@/lib/utils";
-import type { Accessory } from "@/lib/types";
+import type { Accessory, Supplier } from "@/lib/types";
+
+/** Best-effort match of an accessory's supplier name to a Supplier record's email. */
+function findSupplierEmail(name: string | null, suppliers: Supplier[]): string {
+  if (!name) return "";
+  const n = name.trim().toLowerCase();
+  const match = suppliers.find((s) => {
+    const sn = s.name.trim().toLowerCase();
+    return sn === n || sn.includes(n) || n.includes(sn);
+  });
+  return match?.email ?? "";
+}
+
+/** Pre-filled Gmail compose URL for a low-stock reorder request to the supplier. */
+function reorderComposeUrl(a: Accessory, to: string, businessName: string): string {
+  const requested = Math.max(a.reorderLevel * 2 - a.qty, a.reorderLevel);
+  const subject = `Reorder request — ${a.name} (${a.sku})`;
+  const body = [
+    `Hello${a.supplier ? ` ${a.supplier}` : ""},`,
+    ``,
+    `We're running low on the item below and would like to reorder:`,
+    ``,
+    `• Item: ${a.name}`,
+    `• SKU: ${a.sku}`,
+    `• Current stock: ${a.qty}`,
+    `• Reorder level: ${a.reorderLevel}`,
+    `• Requested quantity: ${requested}`,
+    ``,
+    `Please confirm availability, price and lead time.`,
+    ``,
+    `Thank you,`,
+    businessName,
+  ].join("\n");
+  return buildGmailCompose(to, subject, body);
+}
 
 export function AccessoriesView() {
   const toast = useToast();
@@ -30,8 +68,12 @@ export function AccessoriesView() {
 
   const filters = useMemo(() => ({ category, q, lowOnly }), [category, q, lowOnly]);
   const { data: rows, isLoading, isError } = useAccessories(filters);
+  const { data: suppliers } = useSuppliers();
+  const { data: settings } = useSettings();
   const adjust = useAdjustStock();
   const del = useDeleteAccessory();
+
+  const businessName = settings?.businessName ?? "VOZIDEX";
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Accessory | null>(null);
@@ -130,6 +172,7 @@ export function AccessoriesView() {
               <TH className="text-right">Cost</TH>
               <TH className="text-right">Sell</TH>
               <TH>Supplier</TH>
+              <TH>Reorder</TH>
               <TH className="text-right">Actions</TH>
             </tr>
           </THead>
@@ -173,6 +216,26 @@ export function AccessoriesView() {
                 <TD className="text-right tabular-nums text-gray-600">{formatMoney(a.costPrice)}</TD>
                 <TD className="text-right tabular-nums font-medium">{formatMoney(a.sellPrice)}</TD>
                 <TD className="text-gray-600">{a.supplier || "—"}</TD>
+                <TD>
+                  {a.lowStock ? (
+                    <a
+                      href={reorderComposeUrl(
+                        a,
+                        findSupplierEmail(a.supplier, suppliers ?? []),
+                        businessName,
+                      )}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-[13px] font-medium text-brand transition-colors hover:bg-brand/10"
+                      title={`Email ${a.supplier ?? "the supplier"} to reorder ${a.name}`}
+                    >
+                      <Mail className="h-4 w-4" />
+                      Email
+                    </a>
+                  ) : (
+                    <span className="text-xs text-gray-400">In stock</span>
+                  )}
+                </TD>
                 <TD>
                   <div className="flex items-center justify-end gap-1">
                     <Button size="sm" variant="ghost" onClick={() => { setEditing(a); setModalOpen(true); }}>
