@@ -91,10 +91,14 @@ function tiltMove(e: React.MouseEvent<HTMLElement>) {
   el.style.setProperty("--mx", `${e.clientX - r.left}px`);
   el.style.setProperty("--my", `${e.clientY - r.top}px`);
   if (prefersReducedMotion()) return;
-  el.style.transform = `perspective(700px) rotateX(${(0.5 - py) * 5}deg) rotateY(${(px - 0.5) * 5}deg) translateY(-3px)`;
+  const rx = (0.5 - py) * 5;
+  const ry = (px - 0.5) * 5;
+  el.style.transform = `perspective(700px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-3px)`;
+  el.style.boxShadow = `${-ry * 2}px ${14 - rx * 2}px 30px -14px rgba(15, 60, 55, 0.4)`;
 }
 function tiltLeave(e: React.MouseEvent<HTMLElement>) {
   e.currentTarget.style.transform = "";
+  e.currentTarget.style.boxShadow = "";
 }
 
 export function PosView() {
@@ -508,6 +512,7 @@ export function PosView() {
                   className="glass spotlight fx-ring group flex flex-col rounded-2xl p-3 text-left transition-transform"
                 >
                   <span className="spotlight-glow" aria-hidden />
+                  <span className="tilt-glare" aria-hidden />
                   <div className="mb-3 flex items-center justify-between">
                     <span className="rounded-md bg-brand/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-brand">
                       Service
@@ -539,6 +544,7 @@ export function PosView() {
                     )}
                   >
                     {!out && <span className="spotlight-glow" aria-hidden />}
+                    {!out && <span className="tilt-glare" aria-hidden />}
                     <div className="mb-3 flex items-center justify-between">
                       <span
                         className={cn(

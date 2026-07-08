@@ -219,6 +219,35 @@ input[type="number"] {
   opacity: 1;
 }
 
+/* Holographic glare: a glossy light reflection that follows the cursor across
+   the card surface (sits above content, soft-light blend). Reads as a 3D,
+   foil-like sheen when combined with the tilt. */
+.tilt-glare {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  mix-blend-mode: soft-light;
+  background: radial-gradient(
+      circle at var(--mx, 50%) var(--my, 50%),
+      rgba(255, 255, 255, 0.5),
+      rgba(255, 255, 255, 0) 42%
+    ),
+    linear-gradient(
+      105deg,
+      transparent 30%,
+      rgba(45, 212, 191, 0.14) 45%,
+      rgba(34, 211, 238, 0.12) 55%,
+      transparent 70%
+    );
+}
+.spotlight:hover .tilt-glare {
+  opacity: 1;
+}
+
 /* Hover glow-lift for feature cards. */
 .hoverglow {
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),

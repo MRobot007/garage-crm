@@ -23,12 +23,17 @@ export function useTilt(maxDeg = 6) {
     if (prefersReducedMotion()) return;
     const rx = (0.5 - py) * maxDeg;
     const ry = (px - 0.5) * maxDeg;
-    el.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-4px)`;
+    el.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-5px)`;
+    // Drop shadow shifts opposite the tilt so the card reads as floating.
+    el.style.boxShadow = `${-ry * 2}px ${16 - rx * 2}px 34px -14px rgba(15, 60, 55, 0.42)`;
   }
 
   function onMouseLeave() {
     const el = ref.current;
-    if (el) el.style.transform = "";
+    if (el) {
+      el.style.transform = "";
+      el.style.boxShadow = "";
+    }
   }
 
   return { ref, onMouseMove, onMouseLeave };

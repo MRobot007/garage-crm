@@ -66,6 +66,7 @@ export function StatCard({
       className="glass spotlight fx-ring flex flex-col gap-4 rounded-2xl p-5 transition-transform duration-200"
     >
       <span className="spotlight-glow" aria-hidden />
+      <span className="tilt-glare" aria-hidden />
       <div className="relative flex items-start justify-between">
         <span
           className={cn(
