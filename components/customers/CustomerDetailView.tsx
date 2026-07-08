@@ -43,7 +43,7 @@ export function CustomerDetailView({ id }: { id: string }) {
       <PageHeader title={c.name} subtitle={c.phone + (c.email ? ` · ${c.email}` : "")} />
 
       {/* Summary tiles */}
-      <div className="mb-6 grid grid-cols-3 gap-4">
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>
           <CardBody>
             <p className="text-xs uppercase tracking-wide text-gray-500">Cars bought</p>

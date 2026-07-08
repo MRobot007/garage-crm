@@ -16,6 +16,7 @@ import {
   Wrench,
   Package,
   Menu,
+  ChevronDown,
   Banknote,
   CreditCard,
   SplitSquareHorizontal,
@@ -93,6 +94,7 @@ export function PosView() {
   const businessName = settings?.businessName ?? "VOZIDEX";
 
   const [navOpen, setNavOpen] = useState(true);
+  const [cartOpen, setCartOpen] = useState(false); // mobile cart sheet
   const [category, setCategory] = useState("Everything");
   const [q, setQ] = useState("");
   const [cart, setCart] = useState<CartLine[]>([]);
@@ -279,6 +281,7 @@ export function PosView() {
       setCustName("");
       setCustPhone("");
       setCustOpen(false);
+      setCartOpen(false);
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "Couldn’t complete the sale");
     }
@@ -450,7 +453,25 @@ export function PosView() {
           </AnimatePresence>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-5">
+        {/* Mobile category chips (the vertical rail is hidden below sm) */}
+        <div className="flex gap-2 overflow-x-auto border-b border-line/70 px-4 py-2 sm:hidden">
+          {categories.map((c) => (
+            <button
+              key={c}
+              onClick={() => setCategory(c)}
+              className={cn(
+                "shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
+                category === c
+                  ? "bg-gradient-to-b from-brand to-teal-700 text-white"
+                  : "glass-soft text-slate-500",
+              )}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4 pb-24 sm:p-5 lg:pb-5">
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
             {showServices &&
               serviceMatches.map((s) => (
@@ -520,15 +541,32 @@ export function PosView() {
         </div>
       </main>
 
-      {/* Checkout */}
-      <aside className="hidden w-[360px] shrink-0 flex-col border-l border-line/70 bg-white/70 backdrop-blur lg:flex xl:w-[380px]">
+      {/* Checkout — static right column on desktop, slide-up sheet on mobile */}
+      <aside
+        className={cn(
+          "flex flex-col border-line/70 bg-white/85 backdrop-blur",
+          "lg:w-[360px] lg:shrink-0 lg:border-l xl:w-[380px]",
+          "fixed inset-x-0 bottom-0 top-14 z-40 rounded-t-2xl border-t shadow-2xl transition-transform duration-300",
+          "lg:static lg:inset-auto lg:top-auto lg:rounded-none lg:border-t-0 lg:shadow-none lg:transition-none",
+          cartOpen ? "translate-y-0" : "translate-y-full lg:translate-y-0",
+        )}
+      >
         <div className="flex items-center justify-between px-5 py-4">
-          <h2 className="flex items-center gap-2 text-base font-semibold text-ink">
-            Checkout
-            <span className="grid h-5 min-w-5 place-items-center rounded-full bg-brand px-1.5 text-xs font-bold text-white">
-              {itemCount}
-            </span>
-          </h2>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCartOpen(false)}
+              aria-label="Close cart"
+              className="grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 lg:hidden"
+            >
+              <ChevronDown className="h-5 w-5" />
+            </button>
+            <h2 className="flex items-center gap-2 text-base font-semibold text-ink">
+              Checkout
+              <span className="grid h-5 min-w-5 place-items-center rounded-full bg-brand px-1.5 text-xs font-bold text-white">
+                {itemCount}
+              </span>
+            </h2>
+          </div>
           <button
             onClick={clearCart}
             disabled={cart.length === 0}
@@ -711,6 +749,22 @@ export function PosView() {
           </div>
         </div>
       </aside>
+
+      {/* Mobile bar to open the cart sheet */}
+      {!cartOpen && (
+        <button
+          onClick={() => setCartOpen(true)}
+          className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-3 bg-gradient-to-b from-brand to-teal-700 px-5 py-3.5 text-white shadow-2xl lg:hidden"
+        >
+          <span className="flex items-center gap-2 font-semibold">
+            <ShoppingCart className="h-5 w-5" />
+            {itemCount} item{itemCount === 1 ? "" : "s"}
+          </span>
+          <span className="font-bold tabular-nums">
+            {formatMoney(total)} · View cart
+          </span>
+        </button>
+      )}
 
       {/* Receipt after a completed sale */}
       <AnimatePresence>
