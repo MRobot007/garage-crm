@@ -19,13 +19,16 @@ import {
   Package,
   Banknote,
   CreditCard,
+  SplitSquareHorizontal,
   Receipt,
+  Printer,
   Loader2,
   CheckCircle2,
 } from "lucide-react";
 import { useAccessories } from "@/hooks/useAccessories";
 import { useSettings } from "@/hooks/useSettings";
 import { useCreateInvoice } from "@/hooks/useInvoices";
+import { useMe } from "@/hooks/useMe";
 import { useToast } from "@/components/ui/Toast";
 import { ACCESSORY_CATEGORIES } from "@/lib/constants";
 import { formatMoney, cn } from "@/lib/utils";
@@ -58,6 +61,24 @@ interface CartLine {
   category?: string;
 }
 
+type PayMethod = "cash" | "card" | "split";
+
+interface CompletedSale {
+  invoiceNo: string;
+  lines: { name: string; qty: number; price: number; kind: string }[];
+  subtotal: number;
+  tax: number;
+  taxPct: number;
+  total: number;
+  method: PayMethod;
+  cashPart: number;
+  cardPart: number;
+  change: number;
+  customer: string;
+  cashier: string;
+  at: string;
+}
+
 const QUICK_CASH = [10, 20, 50, 100];
 
 export function PosView() {
@@ -65,16 +86,19 @@ export function PosView() {
   const toast = useToast();
   const { data: accessories } = useAccessories();
   const { data: settings } = useSettings();
+  const { data: me } = useMe();
   const createInvoice = useCreateInvoice();
 
   const taxPct = settings?.gstPercent ?? 8;
+  const businessName = settings?.businessName ?? "VOZIDEX";
 
   const [category, setCategory] = useState("Everything");
   const [q, setQ] = useState("");
   const [cart, setCart] = useState<CartLine[]>([]);
   const [held, setHeld] = useState<CartLine[] | null>(null);
-  const [pay, setPay] = useState<"cash" | "card">("cash");
+  const [pay, setPay] = useState<PayMethod>("cash");
   const [tender, setTender] = useState(0);
+  const [sale, setSale] = useState<CompletedSale | null>(null);
   const [custName, setCustName] = useState("");
   const [custPhone, setCustPhone] = useState("");
   const [custOpen, setCustOpen] = useState(false);
@@ -106,9 +130,14 @@ export function PosView() {
   const tax = Math.round((subtotal * taxPct) / 100);
   const total = subtotal + tax;
   const itemCount = cart.reduce((s, l) => s + l.qty, 0);
-  const change = pay === "cash" ? Math.max(0, tender - total) : 0;
+  // Cash & split use the tendered amount; split auto-covers the remainder on card.
+  const cashPart = pay === "card" ? 0 : Math.min(tender, total);
+  const cardPart = pay === "card" ? total : pay === "split" ? total - cashPart : 0;
+  const change = pay === "card" ? 0 : Math.max(0, tender - total);
   const canComplete =
-    cart.length > 0 && !createInvoice.isPending && (pay === "card" || tender >= total);
+    cart.length > 0 &&
+    !createInvoice.isPending &&
+    (pay === "cash" ? tender >= total : true);
 
   // ---- Cart ops ----
   function addAccessory(a: Accessory) {
@@ -198,11 +227,25 @@ export function PosView() {
     router.push("/login");
   }
 
+  function methodNote(): string {
+    if (pay === "card") return `POS · Card ${formatMoney(total)}`;
+    if (pay === "split")
+      return `POS · Split — cash ${formatMoney(cashPart)}, card ${formatMoney(cardPart)}`;
+    return `POS · Cash — tendered ${formatMoney(tender)}, change ${formatMoney(change)}`;
+  }
+
   async function completeSale() {
     if (!canComplete) return;
+    const snapshotLines = cart.map((l) => ({
+      name: l.name,
+      qty: l.qty,
+      price: l.price,
+      kind: l.kind,
+    }));
+    const customer = custName.trim() || "Walk-in Customer";
     try {
-      const inv = await createInvoice.mutateAsync({
-        customerName: custName.trim() || "Walk-in Customer",
+      const inv = (await createInvoice.mutateAsync({
+        customerName: customer,
         customerPhone: custPhone.trim() || "0000000000",
         items: cart
           .filter((l) => l.kind === "accessory")
@@ -213,9 +256,24 @@ export function PosView() {
         discount: 0,
         gstPercent: taxPct,
         received: total,
-      } as never);
-      const changeMsg = pay === "cash" && change > 0 ? ` · Change ${formatMoney(change)}` : "";
-      toast.success(`Sale complete — ${(inv as { invoiceNo?: string }).invoiceNo ?? ""}${changeMsg}`);
+        notes: methodNote(),
+      } as never)) as { invoiceNo?: string };
+
+      setSale({
+        invoiceNo: inv.invoiceNo ?? "",
+        lines: snapshotLines,
+        subtotal,
+        tax,
+        taxPct,
+        total,
+        method: pay,
+        cashPart,
+        cardPart,
+        change,
+        customer,
+        cashier: me?.name ?? "",
+        at: new Date().toLocaleString("en-US"),
+      });
       clearCart();
       setCustName("");
       setCustPhone("");
@@ -223,6 +281,12 @@ export function PosView() {
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "Couldn’t complete the sale");
     }
+  }
+
+  function printReceipt() {
+    document.body.classList.add("printing-receipt");
+    window.print();
+    window.setTimeout(() => document.body.classList.remove("printing-receipt"), 600);
   }
 
   const categories = ["Everything", ...ACCESSORY_CATEGORIES, SERVICES_CAT];
@@ -430,31 +494,37 @@ export function PosView() {
         </div>
 
         {/* Payment method */}
-        <div className="grid grid-cols-2 gap-2 px-5">
-          {(["cash", "card"] as const).map((m) => (
+        <div className="grid grid-cols-3 gap-2 px-5">
+          {(["cash", "card", "split"] as const).map((m) => (
             <button
               key={m}
               onClick={() => setPay(m)}
               className={cn(
-                "flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold capitalize transition-all",
+                "flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold capitalize transition-all",
                 pay === m
                   ? "bg-gradient-to-b from-brand to-teal-700 text-white shadow-md shadow-brand/25"
                   : "glass-soft text-slate-500 hover:text-ink",
               )}
             >
-              {m === "cash" ? <Banknote className="h-4 w-4" /> : <CreditCard className="h-4 w-4" />}
+              {m === "cash" ? (
+                <Banknote className="h-4 w-4" />
+              ) : m === "card" ? (
+                <CreditCard className="h-4 w-4" />
+              ) : (
+                <SplitSquareHorizontal className="h-4 w-4" />
+              )}
               {m}
             </button>
           ))}
         </div>
 
-        {/* Cash tender */}
-        {pay === "cash" && (
+        {/* Cash / split tender */}
+        {pay !== "card" && (
           <div className="mt-3 px-5">
             <div className="rounded-xl bg-teal-50/70 p-3">
               <div className="flex items-center justify-between">
                 <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                  Received $
+                  {pay === "split" ? "Cash part $" : "Received $"}
                 </label>
                 <span className="text-xs text-slate-500">
                   Change{" "}
@@ -480,6 +550,22 @@ export function PosView() {
                   </button>
                 ))}
               </div>
+              {pay === "split" && (
+                <div className="mt-2 flex items-center justify-between rounded-lg bg-white/70 px-3 py-2 text-sm">
+                  <span className="flex items-center gap-1.5 text-slate-500">
+                    <CreditCard className="h-4 w-4 text-brand" /> On card
+                  </span>
+                  <span className="font-semibold tabular-nums text-ink">{formatMoney(cardPart)}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        {pay === "card" && (
+          <div className="mt-3 px-5">
+            <div className="flex items-center gap-2 rounded-xl bg-teal-50/70 p-3 text-sm text-slate-600">
+              <CreditCard className="h-4 w-4 text-brand" />
+              Charge <span className="font-semibold text-ink">{formatMoney(total)}</span> to card
             </div>
           </div>
         )}
@@ -579,6 +665,135 @@ export function PosView() {
           </div>
         </div>
       </aside>
+
+      {/* Receipt after a completed sale */}
+      <AnimatePresence>
+        {sale && (
+          <motion.div
+            className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              className="pos-receipt w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl"
+            >
+              <div className="max-h-[80vh] overflow-y-auto p-6">
+                <div className="mb-4 text-center">
+                  <p className={cn(displayFont.className, "text-2xl font-bold uppercase tracking-wide text-ink")}>
+                    {businessName}
+                  </p>
+                  <p className="text-xs text-slate-500">Sales Receipt</p>
+                </div>
+                <div className="mb-3 flex items-center justify-center gap-2 rounded-lg bg-emerald-50 py-2 text-sm font-semibold text-emerald-600">
+                  <CheckCircle2 className="h-4 w-4" /> Payment complete
+                </div>
+
+                <dl className="mb-3 space-y-0.5 text-xs text-slate-500">
+                  <div className="flex justify-between">
+                    <dt>Receipt</dt>
+                    <dd className="font-medium text-ink">{sale.invoiceNo}</dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt>Date</dt>
+                    <dd>{sale.at}</dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt>Customer</dt>
+                    <dd>{sale.customer}</dd>
+                  </div>
+                  {sale.cashier && (
+                    <div className="flex justify-between">
+                      <dt>Cashier</dt>
+                      <dd>{sale.cashier}</dd>
+                    </div>
+                  )}
+                </dl>
+
+                <div className="border-y border-dashed border-line py-2">
+                  <table className="w-full text-sm">
+                    <tbody>
+                      {sale.lines.map((l, i) => (
+                        <tr key={i} className="align-top">
+                          <td className="py-1 pr-2">
+                            {l.name}
+                            <span className="text-slate-400"> ×{l.qty}</span>
+                          </td>
+                          <td className="py-1 text-right tabular-nums">
+                            {formatMoney(l.price * l.qty)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <dl className="space-y-1 py-3 text-sm">
+                  <div className="flex justify-between text-slate-500">
+                    <dt>Subtotal</dt>
+                    <dd className="tabular-nums">{formatMoney(sale.subtotal)}</dd>
+                  </div>
+                  <div className="flex justify-between text-slate-500">
+                    <dt>Tax ({sale.taxPct}%)</dt>
+                    <dd className="tabular-nums">{formatMoney(sale.tax)}</dd>
+                  </div>
+                  <div className="flex justify-between border-t border-line pt-1 text-base font-bold text-ink">
+                    <dt>Total</dt>
+                    <dd className="tabular-nums">{formatMoney(sale.total)}</dd>
+                  </div>
+                </dl>
+
+                <dl className="space-y-0.5 rounded-lg bg-slate-500/5 p-3 text-sm">
+                  {sale.method === "split" ? (
+                    <>
+                      <div className="flex justify-between text-slate-500">
+                        <dt>Cash</dt>
+                        <dd className="tabular-nums">{formatMoney(sale.cashPart)}</dd>
+                      </div>
+                      <div className="flex justify-between text-slate-500">
+                        <dt>Card</dt>
+                        <dd className="tabular-nums">{formatMoney(sale.cardPart)}</dd>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex justify-between text-slate-500">
+                      <dt className="capitalize">{sale.method}</dt>
+                      <dd className="tabular-nums">{formatMoney(sale.total)}</dd>
+                    </div>
+                  )}
+                  {sale.change > 0 && (
+                    <div className="flex justify-between font-semibold text-ok">
+                      <dt>Change</dt>
+                      <dd className="tabular-nums">{formatMoney(sale.change)}</dd>
+                    </div>
+                  )}
+                </dl>
+
+                <p className="mt-4 text-center text-xs text-slate-400">
+                  Thank you for your business!
+                </p>
+              </div>
+
+              <div className="pos-print-hide grid grid-cols-2 gap-2 border-t border-line p-4">
+                <button
+                  onClick={printReceipt}
+                  className="flex items-center justify-center gap-2 rounded-xl border border-line py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+                >
+                  <Printer className="h-4 w-4" /> Print
+                </button>
+                <button
+                  onClick={() => setSale(null)}
+                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-brand to-teal-700 py-2.5 text-sm font-semibold text-white shadow-md shadow-brand/25 transition-all hover:brightness-[1.08] active:scale-[0.97]"
+                >
+                  New sale
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
