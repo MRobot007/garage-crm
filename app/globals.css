@@ -130,6 +130,109 @@ input[type="number"] {
   font-family: "Oswald", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
+/* ============================================================
+   Ambient effects — aurora atmosphere, film grain, cursor spotlight,
+   hover glow. Teal only; all motion honours prefers-reduced-motion.
+   ============================================================ */
+
+/* App-wide atmosphere: slow-drifting teal aurora + a whisper of grain,
+   sitting behind all content (translucent glass cards let it glow through). */
+.atmos {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  overflow: hidden;
+  pointer-events: none;
+}
+.atmos-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  opacity: 0.55;
+  will-change: transform;
+}
+.atmos-b1 {
+  width: 42rem;
+  height: 42rem;
+  top: -12rem;
+  left: -10rem;
+  background: radial-gradient(circle, rgba(20, 184, 166, 0.16), transparent 70%);
+  animation: atmosDrift1 24s ease-in-out infinite;
+}
+.atmos-b2 {
+  width: 36rem;
+  height: 36rem;
+  top: 28%;
+  right: -12rem;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.12), transparent 70%);
+  animation: atmosDrift2 30s ease-in-out infinite;
+}
+.atmos-b3 {
+  width: 32rem;
+  height: 32rem;
+  bottom: -14rem;
+  left: 32%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.12), transparent 70%);
+  animation: atmosDrift3 27s ease-in-out infinite;
+}
+.atmos-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@keyframes atmosDrift1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(5rem, 3rem) scale(1.1); }
+}
+@keyframes atmosDrift2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-4rem, 4rem) scale(1.08); }
+}
+@keyframes atmosDrift3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(3rem, -4rem) scale(1.12); }
+}
+
+/* Cursor spotlight: a soft teal glow that follows the pointer inside a card.
+   JS sets --mx/--my; the glow only shows on hover. */
+.spotlight {
+  position: relative;
+}
+.spotlight-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: radial-gradient(
+    240px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(13, 148, 136, 0.16),
+    transparent 62%
+  );
+}
+.spotlight:hover .spotlight-glow {
+  opacity: 1;
+}
+
+/* Hover glow-lift for feature cards. */
+.hoverglow {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hoverglow:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 22px 50px -26px rgba(13, 148, 136, 0.45),
+    0 0 0 1px rgba(13, 148, 136, 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atmos-blob { animation: none !important; }
+  .hoverglow:hover { transform: none; }
+}
+
 /* POS receipt printing — format for an 80mm thermal roll and print only the
    receipt card. Scoped to a body class toggled just before window.print() so
    it never affects the A4 invoice print. */

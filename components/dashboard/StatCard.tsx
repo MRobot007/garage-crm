@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import { TrendingUp, TrendingDown } from "lucide-react";
 import { useCountUp } from "@/hooks/useCountUp";
 import { formatMoney, formatNumber, cn } from "@/lib/utils";
@@ -57,10 +57,24 @@ export function StatCard({
   const display = format === "inr" ? formatMoney(n) : formatNumber(n);
   const a = ACCENTS[accent];
   const fill = progress === undefined ? 1 : Math.max(0, Math.min(1, progress));
+  const ref = useRef<HTMLDivElement>(null);
+
+  function onMove(e: React.MouseEvent<HTMLDivElement>) {
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--mx", `${e.clientX - r.left}px`);
+    el.style.setProperty("--my", `${e.clientY - r.top}px`);
+  }
 
   return (
-    <div className="glass group flex flex-col gap-4 rounded-2xl p-5 transition-transform duration-200 hover:-translate-y-1">
-      <div className="flex items-start justify-between">
+    <div
+      ref={ref}
+      onMouseMove={onMove}
+      className="glass spotlight relative flex flex-col gap-4 overflow-hidden rounded-2xl p-5 transition-transform duration-200 hover:-translate-y-1"
+    >
+      <span className="spotlight-glow" aria-hidden />
+      <div className="relative flex items-start justify-between">
         <span
           className={cn(
             "grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br text-white shadow-md shadow-black/5 [&_svg]:h-[22px] [&_svg]:w-[22px]",
@@ -72,14 +86,14 @@ export function StatCard({
         {delta !== null && delta !== undefined && <DeltaBadge value={delta} />}
       </div>
 
-      <div>
+      <div className="relative">
         <p className="text-[26px] font-semibold leading-none tabular-nums text-ink">
           {display}
         </p>
         <p className="mt-1.5 text-sm text-slate-500">{label}</p>
       </div>
 
-      <div className="h-1.5 overflow-hidden rounded-full bg-slate-500/10">
+      <div className="relative h-1.5 overflow-hidden rounded-full bg-slate-500/10">
         <div
           className={cn(
             "h-full rounded-full bg-gradient-to-r transition-[width] duration-700",
