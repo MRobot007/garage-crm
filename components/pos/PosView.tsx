@@ -334,8 +334,14 @@ export function PosView() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.png" alt="VOZIDEX" className="mb-3 h-10 w-10 object-contain" />
         <RailButton label="Register" active icon={<ShoppingCart className="h-5 w-5" />} />
-        <RailLink href="/" label="Dashboard" icon={<Home className="h-5 w-5" />} />
-        <RailLink href="/invoices" label="Sales history" icon={<History className="h-5 w-5" />} />
+        <RailLink
+          href={me?.role === "staff" ? "/leads" : "/"}
+          label={me?.role === "staff" ? "Home" : "Dashboard"}
+          icon={<Home className="h-5 w-5" />}
+        />
+        {me?.role !== "staff" && (
+          <RailLink href="/invoices" label="Sales history" icon={<History className="h-5 w-5" />} />
+        )}
         <RailLink href="/accessories" label="Inventory" icon={<Package className="h-5 w-5" />} />
         <button
           onClick={logout}

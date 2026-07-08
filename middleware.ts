@@ -30,6 +30,20 @@ function isManagerUp(path: string): boolean {
   );
 }
 
+// Staff have a restricted section: no Dashboard and no Sales & Invoices. They
+// get POS, Enquiries, Leads, Cars, Accessories, Customers and Shifts only.
+function isStaffForbidden(path: string): boolean {
+  return (
+    path === "/" ||
+    path === "/api/dashboard" ||
+    path === "/invoices" ||
+    path.startsWith("/invoices/")
+  );
+}
+
+// Where each role lands when it hits a page it may not see.
+const STAFF_HOME = "/leads";
+
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const method = req.method;
@@ -62,19 +76,23 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  const role = session.role;
+
   const deny = () => {
     if (isApi) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
     const url = req.nextUrl.clone();
-    url.pathname = "/";
+    // Send staff to a page they can actually use (Dashboard is off-limits to
+    // them, so redirecting there would loop).
+    url.pathname = role === "staff" ? STAFF_HOME : "/";
     url.search = "";
     return NextResponse.redirect(url);
   };
 
-  const role = session.role;
   if (isOwnerOnly(pathname, method) && role !== "owner") return deny();
   if (isManagerUp(pathname) && role === "staff") return deny();
+  if (role === "staff" && isStaffForbidden(pathname)) return deny();
   // Staff cannot delete records.
   if (isApi && method === "DELETE" && role === "staff") return deny();
 
