@@ -156,8 +156,75 @@ export function LeadsView() {
         />
       )}
 
+      {/* Mobile: stacked cards (desktop keeps the table below, unchanged) */}
       {leads && leads.length > 0 && (
-        <TableWrap>
+        <ul className="space-y-3 sm:hidden">
+          {leads.map((lead) => (
+            <li key={lead.id} className="glass rounded-2xl p-4">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="truncate font-medium text-ink">{lead.name}</p>
+                  <p className="text-sm text-gray-500">{lead.phone}</p>
+                </div>
+                <Badge tone="neutral">{lead.source}</Badge>
+              </div>
+              {lead.interestedIn && (
+                <p className="mt-2 text-sm text-gray-600">{lead.interestedIn}</p>
+              )}
+              <div className="mt-3">
+                <Select
+                  aria-label={`Status for ${lead.name}`}
+                  value={lead.status}
+                  onChange={(e) => onStatusChange(lead, e.target.value)}
+                  className="h-9 w-full text-sm"
+                  options={LEAD_STATUSES.map((s) => ({ value: s, label: LEAD_STATUS_LABELS[s] }))}
+                />
+              </div>
+              {(lead.followUpDate || lead.staff) && (
+                <p className="mt-2 text-xs text-gray-500">
+                  {lead.followUpDate && (
+                    <span
+                      className={
+                        isDueOrOverdue(lead.followUpDate) &&
+                        !["Won", "Lost"].includes(lead.status)
+                          ? "font-medium text-warn"
+                          : ""
+                      }
+                    >
+                      Follow-up {formatDate(lead.followUpDate)}
+                    </span>
+                  )}
+                  {lead.followUpDate && lead.staff ? " · " : ""}
+                  {lead.staff}
+                </p>
+              )}
+              <div className="mt-3 flex flex-wrap gap-2">
+                {lead.status === "Won" && (
+                  <Button size="sm" variant="secondary" onClick={() => convertToSale(lead)}>
+                    Convert to sale
+                  </Button>
+                )}
+                <Button size="sm" variant="ghost" onClick={() => openEdit(lead)}>
+                  Edit
+                </Button>
+                {canDelete && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-bad hover:bg-red-50"
+                    onClick={() => setToDelete(lead)}
+                  >
+                    Delete
+                  </Button>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {leads && leads.length > 0 && (
+        <TableWrap className="hidden sm:block">
           <THead>
             <tr>
               <TH>Name</TH>

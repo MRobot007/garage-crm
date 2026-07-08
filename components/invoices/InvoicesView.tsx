@@ -153,8 +153,68 @@ export function InvoicesView() {
         />
       )}
 
+      {/* Mobile: stacked cards (desktop table below is unchanged) */}
       {invoices && invoices.length > 0 && (
-        <TableWrap>
+        <ul className="space-y-3 sm:hidden">
+          {invoices.map((inv) => (
+            <li key={inv.id} className="glass rounded-2xl p-4">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <Link
+                    href={`/invoices/${inv.id}`}
+                    className="font-medium text-ink hover:text-brand hover:underline"
+                  >
+                    {inv.invoiceNo}
+                  </Link>
+                  <p className="text-xs text-gray-500">
+                    {formatDate(inv.date)} · {inv.customer?.name ?? "—"}
+                  </p>
+                </div>
+                <Badge tone={invoiceStatusTone(inv.status)}>{inv.status}</Badge>
+              </div>
+              <p className="mt-2 truncate text-sm text-gray-600">{summary(inv)}</p>
+              <div className="mt-2 flex items-baseline justify-between">
+                <span className="text-lg font-semibold tabular-nums text-ink">
+                  {formatMoney(inv.total)}
+                </span>
+                <span className={`text-sm tabular-nums ${inv.balance > 0 ? "text-bad" : "text-ok"}`}>
+                  {inv.balance > 0 ? `${formatMoney(inv.balance)} due` : "Paid"}
+                </span>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {inv.balance > 0 && (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => {
+                      setPayFor(inv);
+                      setPayAmount(String(inv.received));
+                    }}
+                  >
+                    Payment
+                  </Button>
+                )}
+                <Link href={`/invoices/${inv.id}`}>
+                  <Button size="sm" variant="ghost">View</Button>
+                </Link>
+                {canDelete && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-bad hover:bg-red-50"
+                    onClick={() => setToDelete(inv)}
+                  >
+                    Delete
+                  </Button>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {invoices && invoices.length > 0 && (
+        <TableWrap className="hidden sm:block">
           <THead>
             <tr>
               <TH>Invoice</TH>

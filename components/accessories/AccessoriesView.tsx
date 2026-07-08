@@ -165,8 +165,93 @@ export function AccessoriesView() {
         />
       )}
 
+      {/* Mobile: stacked cards (desktop table below is unchanged) */}
       {rows && rows.length > 0 && (
-        <TableWrap>
+        <ul className="space-y-3 sm:hidden">
+          {rows.map((a) => (
+            <li
+              key={a.id}
+              className={"glass rounded-2xl p-4 " + (a.lowStock ? "ring-1 ring-bad/30" : "")}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="truncate font-medium text-ink">{a.name}</p>
+                  <p className="text-xs text-gray-500">{a.sku}</p>
+                </div>
+                <Badge tone="neutral">{a.category}</Badge>
+              </div>
+              <div className="mt-3 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    aria-label={`Decrease ${a.name}`}
+                    onClick={() => onAdjust(a, -1)}
+                    disabled={a.qty <= 0}
+                    className="grid h-8 w-8 place-items-center glass-soft rounded-lg text-gray-600 disabled:opacity-40"
+                  >
+                    −
+                  </button>
+                  <span
+                    className={`min-w-8 text-center tabular-nums ${a.lowStock ? "font-semibold text-bad" : "text-ink"}`}
+                  >
+                    {a.qty}
+                  </span>
+                  <button
+                    aria-label={`Increase ${a.name}`}
+                    onClick={() => onAdjust(a, 1)}
+                    className="grid h-8 w-8 place-items-center glass-soft rounded-lg text-gray-600"
+                  >
+                    +
+                  </button>
+                  {a.lowStock && (
+                    <span className="text-[11px] text-bad">≤ {a.reorderLevel}</span>
+                  )}
+                </div>
+                <div className="text-right">
+                  <span className="text-base font-semibold tabular-nums text-ink">
+                    {formatMoney(a.sellPrice)}
+                  </span>
+                  <span className="ml-1 text-xs text-gray-400">
+                    cost {formatMoney(a.costPrice)}
+                  </span>
+                </div>
+              </div>
+              <p className="mt-2 text-xs text-gray-500">{a.supplier || "—"}</p>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {a.lowStock && (
+                  <a
+                    href={reorderComposeUrl(
+                      a,
+                      findSupplierEmail(a.supplier, suppliers ?? []),
+                      businessName,
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-[13px] font-medium text-brand hover:bg-brand/10"
+                  >
+                    <Mail className="h-4 w-4" /> Email
+                  </a>
+                )}
+                <Button size="sm" variant="ghost" onClick={() => { setEditing(a); setModalOpen(true); }}>
+                  Edit
+                </Button>
+                {canDelete && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-bad hover:bg-red-50"
+                    onClick={() => setToDelete(a)}
+                  >
+                    Delete
+                  </Button>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {rows && rows.length > 0 && (
+        <TableWrap className="hidden sm:block">
           <THead>
             <tr>
               <TH>Name</TH>

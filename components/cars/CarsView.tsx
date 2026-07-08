@@ -133,8 +133,70 @@ export function CarsView() {
         />
       )}
 
+      {/* Mobile: stacked cards (desktop table below is unchanged) */}
       {cars && cars.length > 0 && (
-        <TableWrap>
+        <ul className="space-y-3 sm:hidden">
+          {cars.map((car) => (
+            <li key={car.id} className="glass rounded-2xl p-4">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <Link
+                    href={`/cars/${car.id}`}
+                    className="font-medium text-ink hover:text-brand hover:underline"
+                  >
+                    {car.make} {car.model} {car.year}
+                  </Link>
+                  <p className="text-xs text-gray-500">
+                    {car.regNo} · {formatNumber(car.km)} mi · {car.daysInStock}d
+                  </p>
+                </div>
+                <Badge tone={car.type === "New" ? "blue" : "neutral"}>{car.type}</Badge>
+              </div>
+              <div className="mt-2 flex items-baseline justify-between">
+                <span className="text-lg font-semibold tabular-nums text-ink">
+                  {formatMoney(car.askingPrice)}
+                </span>
+                <span
+                  className={`text-sm tabular-nums ${car.margin >= 0 ? "text-ok" : "text-bad"}`}
+                >
+                  {formatMoney(car.margin)} margin
+                </span>
+              </div>
+              <div className="mt-3">
+                <Select
+                  aria-label={`Status for ${car.make} ${car.model}`}
+                  value={car.status}
+                  onChange={(e) => onStatusChange(car, e.target.value)}
+                  className="h-9 w-full text-sm"
+                  disabled={Boolean(car.invoice)}
+                  options={CAR_STATUSES.map((s) => ({ value: s, label: s }))}
+                />
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Link href={`/cars/${car.id}`}>
+                  <Button size="sm" variant="ghost">View</Button>
+                </Link>
+                <Button size="sm" variant="ghost" onClick={() => { setEditing(car); setModalOpen(true); }}>
+                  Edit
+                </Button>
+                {canDelete && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-bad hover:bg-red-50"
+                    onClick={() => setToDelete(car)}
+                  >
+                    Delete
+                  </Button>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {cars && cars.length > 0 && (
+        <TableWrap className="hidden sm:block">
           <THead>
             <tr>
               <TH>Car</TH>
