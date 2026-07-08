@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 import { NAV_ITEMS } from "./nav";
 import { useMe } from "@/hooks/useMe";
 import type { Role } from "@/lib/constants";
@@ -60,15 +61,21 @@ export function Sidebar({ collapsed, onNavigate }: SidebarProps) {
             title={collapsed ? item.label : undefined}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+              "relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
               collapsed && "justify-center px-0",
-              active
-                ? "bg-white/[0.13] text-white shadow-sm ring-1 ring-inset ring-white/15"
-                : "text-teal-50/70 hover:bg-white/[0.08] hover:text-white",
+              active ? "text-white" : "text-teal-50/70 hover:bg-white/[0.08] hover:text-white",
             )}
           >
-            <span className="shrink-0">{item.icon}</span>
-            {!collapsed && <span className="truncate">{item.label}</span>}
+            {active && (
+              <motion.span
+                layoutId="activeNav"
+                className="absolute inset-0 rounded-lg bg-white/[0.13] shadow-sm ring-1 ring-inset ring-white/15"
+                transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                aria-hidden
+              />
+            )}
+            <span className="relative z-10 shrink-0">{item.icon}</span>
+            {!collapsed && <span className="relative z-10 truncate">{item.label}</span>}
           </Link>
         );
       })}

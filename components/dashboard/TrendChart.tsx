@@ -127,7 +127,15 @@ export function TrendChart({ data }: { data: Record<TrendRange, TrendPoint[]> })
       </div>
 
       <div className="relative" onMouseMove={onMove} onMouseLeave={() => setHover(null)}>
-        <svg viewBox={`0 0 ${W} ${H}`} width="100%" className="block overflow-visible">
+        <svg
+          viewBox={`0 0 ${W} ${H}`}
+          width="100%"
+          className="block overflow-visible"
+          role="img"
+          aria-label={`${c.label} — ${sub}. ${series
+            .map((d) => `${d.label}: ${fmt(d[metric])}`)
+            .join(", ")}`}
+        >
           <defs>
             <linearGradient id={`area-${metric}`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={c.color} stopOpacity="0.28" />

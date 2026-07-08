@@ -16,8 +16,9 @@ import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/Card";
 import { StatCard } from "./StatCard";
 import { DonutChart, type DonutSegment } from "./DonutChart";
 import { TrendChart } from "./TrendChart";
+import { DashboardSkeleton } from "./DashboardSkeleton";
 import { Badge, leadStatusTone } from "@/components/ui/Badge";
-import { Spinner } from "@/components/ui/Spinner";
+import { Button } from "@/components/ui/Button";
 import { LEAD_STATUS_LABELS, type LeadStatus } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
 
@@ -34,7 +35,7 @@ const STAGE_COLORS: Record<string, string> = {
 const share = (part: number, whole: number) => (whole > 0 ? part / whole : 0);
 
 export function DashboardView() {
-  const { data, isLoading, isError } = useDashboard();
+  const { data, isLoading, isError, refetch, isFetching } = useDashboard();
 
   return (
     <div>
@@ -43,19 +44,20 @@ export function DashboardView() {
         subtitle="A quick pulse of the garage — leads, stock, sales and payments."
       />
 
-      {isLoading && (
-        <div className="flex items-center gap-2 py-20 text-gray-500">
-          <Spinner /> Loading dashboard…
-        </div>
-      )}
+      {isLoading && <DashboardSkeleton />}
 
       {isError && (
         <Card>
-          <CardBody>
-            <p className="text-sm text-bad">
-              Couldn’t load the dashboard. Make sure the database is set up
-              (`npm run db:push && npm run db:seed`).
+          <CardBody className="flex flex-col items-center gap-3 py-14 text-center">
+            <p className="text-sm font-medium text-ink">
+              We couldn’t load your dashboard right now.
             </p>
+            <p className="max-w-sm text-sm text-slate-500">
+              This is usually a brief network hiccup. Please try again in a moment.
+            </p>
+            <Button variant="secondary" loading={isFetching} onClick={() => refetch()}>
+              Try again
+            </Button>
           </CardBody>
         </Card>
       )}

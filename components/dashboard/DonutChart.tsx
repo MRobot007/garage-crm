@@ -77,6 +77,10 @@ export function DonutChart({
           height={size}
           viewBox={`0 0 ${size} ${size}`}
           style={{ transform: "rotate(-90deg)" }}
+          role="img"
+          aria-label={`Distribution (${total} total): ${arcs
+            .map((a) => `${a.label} ${a.value}`)
+            .join(", ")}`}
         >
           <circle
             cx={c}
