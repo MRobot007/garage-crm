@@ -26,6 +26,7 @@ import {
   useDeleteLead,
 } from "@/hooks/useLeads";
 import { useStaggerReveal } from "@/hooks/useStaggerReveal";
+import { useMe } from "@/hooks/useMe";
 import {
   LEAD_SOURCES,
   LEAD_STATUSES,
@@ -46,6 +47,8 @@ export function LeadsView() {
 
   const updateStatus = useUpdateLeadStatus();
   const del = useDeleteLead();
+  const { data: me } = useMe();
+  const canDelete = me?.role !== "staff";
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Lead | null>(null);
@@ -219,14 +222,16 @@ export function LeadsView() {
                     <Button size="sm" variant="ghost" onClick={() => openEdit(lead)}>
                       Edit
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-bad hover:bg-red-50"
-                      onClick={() => setToDelete(lead)}
-                    >
-                      Delete
-                    </Button>
+                    {canDelete && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-bad hover:bg-red-50"
+                        onClick={() => setToDelete(lead)}
+                      >
+                        Delete
+                      </Button>
+                    )}
                   </div>
                 </TD>
               </TR>

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { ok, parseBody, handle } from "@/lib/api";
+import { guardRole } from "@/lib/session";
 import { settingsSchema } from "@/lib/schemas";
 import type { Settings } from "@/lib/types";
 
@@ -29,6 +30,8 @@ export async function GET() {
 }
 
 export async function PATCH(req: Request) {
+  const denied = await guardRole(["owner"]);
+  if (denied) return denied;
   return handle(async () => {
     const parsed = await parseBody(req, settingsSchema);
     if (!parsed.success) return parsed.response;

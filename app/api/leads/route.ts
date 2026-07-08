@@ -3,6 +3,7 @@ import { ok, parseBody, handle } from "@/lib/api";
 import { leadSchema } from "@/lib/schemas";
 import { logAudit } from "@/lib/audit";
 import { currentSession } from "@/lib/session";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +46,13 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  // Public + unauthenticated: throttle to blunt spam/DB-flood (20/min/IP).
+  if (!rateLimit(`leads:${clientIp(req)}`, 20, 60_000)) {
+    return new Response(JSON.stringify({ error: "Too many requests" }), {
+      status: 429,
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+    });
+  }
   const res = await handle(async () => {
     const parsed = await parseBody(req, leadSchema);
     if (!parsed.success) return parsed.response;

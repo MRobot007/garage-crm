@@ -82,5 +82,11 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)"],
+  matcher: [
+    // Run on EVERY API route (no dot-based exclusion) so auth/RBAC can never be
+    // skipped by a request path that happens to contain a dot.
+    "/api/:path*",
+    // Pages: everything except Next internals and static asset files.
+    "/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)",
+  ],
 };

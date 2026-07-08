@@ -33,6 +33,7 @@ export function InvoicesView() {
 
   const { data: me } = useMe();
   const canExport = me?.role === "owner" || me?.role === "manager";
+  const canDelete = me?.role !== "staff";
   const [status, setStatus] = useState("all");
   const { data: invoices, isLoading, isError } = useInvoices(status);
   const recordPayment = useRecordPayment();
@@ -201,14 +202,16 @@ export function InvoicesView() {
                     <Link href={`/invoices/${inv.id}`}>
                       <Button size="sm" variant="ghost">View</Button>
                     </Link>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-bad hover:bg-red-50"
-                      onClick={() => setToDelete(inv)}
-                    >
-                      Delete
-                    </Button>
+                    {canDelete && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-bad hover:bg-red-50"
+                        onClick={() => setToDelete(inv)}
+                      >
+                        Delete
+                      </Button>
+                    )}
                   </div>
                 </TD>
               </TR>

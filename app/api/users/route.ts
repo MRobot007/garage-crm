@@ -1,12 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { ok, fail, parseBody, handle } from "@/lib/api";
+import { guardRole } from "@/lib/session";
 import { userCreateSchema } from "@/lib/schemas";
 import { hashPassword } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
-// Access is owner-only (enforced in middleware). Never returns passwordHash.
+// Access is owner-only (enforced in middleware + this in-handler guard). Never
+// returns passwordHash.
 const SELECT = {
   id: true,
   name: true,
@@ -17,6 +19,8 @@ const SELECT = {
 } as const;
 
 export async function GET() {
+  const denied = await guardRole(["owner"]);
+  if (denied) return denied;
   return handle(async () => {
     const users = await prisma.user.findMany({
       select: SELECT,
@@ -27,6 +31,8 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const denied = await guardRole(["owner"]);
+  if (denied) return denied;
   return handle(async () => {
     const parsed = await parseBody(req, userCreateSchema);
     if (!parsed.success) return parsed.response;

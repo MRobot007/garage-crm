@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { ok, fail, parseBody, handle } from "@/lib/api";
+import { guardRole } from "@/lib/session";
 import { userUpdateSchema } from "@/lib/schemas";
 import { hashPassword } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
@@ -28,6 +29,8 @@ export async function PATCH(
   req: Request,
   { params }: { params: { id: string } },
 ) {
+  const denied = await guardRole(["owner"]);
+  if (denied) return denied;
   return handle(async () => {
     const parsed = await parseBody(req, userUpdateSchema);
     if (!parsed.success) return parsed.response;
@@ -72,6 +75,8 @@ export async function DELETE(
   _req: Request,
   { params }: { params: { id: string } },
 ) {
+  const denied = await guardRole(["owner"]);
+  if (denied) return denied;
   return handle(async () => {
     const target = await prisma.user.findUnique({ where: { id: params.id } });
     if (!target) return fail("User not found", 404);

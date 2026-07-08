@@ -9,8 +9,14 @@ import {
   verifyPassword,
   type Role,
 } from "@/lib/auth";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
+
+// A valid but never-matching hash, so a missing/inactive user still costs one
+// full PBKDF2 verification — keeps response time constant (no username oracle).
+const DUMMY_HASH =
+  "hsPqQ7KZsK-Qqs49-Fqwog.ab4OI_rTbM2o96Fj58rtUByihgdhh-6hth8k8sXfSp4";
 
 const schema = z.object({
   username: z.string().trim().min(1),
@@ -18,6 +24,14 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
+  // Throttle password guessing: 10 attempts / minute / IP.
+  if (!rateLimit(`login:${clientIp(req)}`, 10, 60_000)) {
+    return NextResponse.json(
+      { error: "Too many attempts. Please wait a minute and try again." },
+      { status: 429 },
+    );
+  }
+
   let body: unknown;
   try {
     body = await req.json();
@@ -34,10 +48,11 @@ export async function POST(req: Request) {
   const username = parsed.data.username.toLowerCase();
 
   const user = await prisma.user.findUnique({ where: { username } });
-  const okPassword =
-    user && user.active
-      ? await verifyPassword(parsed.data.password, user.passwordHash)
-      : false;
+  // Always run a verification (dummy hash when no active user) for constant time.
+  const okPassword = await verifyPassword(
+    parsed.data.password,
+    user && user.active ? user.passwordHash : DUMMY_HASH,
+  );
   if (!user || !user.active || !okPassword) {
     return NextResponse.json(
       { error: "Incorrect username or password" },

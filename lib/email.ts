@@ -37,12 +37,14 @@ export async function sendMail(params: {
       },
     });
 
+    // Strip CR/LF from single-line headers to prevent header injection.
+    const oneLine = (s: string) => s.replace(/[\r\n]+/g, " ").trim();
     const info = await transporter.sendMail({
       from: process.env.SMTP_FROM || process.env.SMTP_USER,
-      to: params.to,
-      subject: params.subject,
+      to: oneLine(params.to),
+      subject: oneLine(params.subject),
       text: params.text,
-      replyTo: params.replyTo,
+      replyTo: params.replyTo ? oneLine(params.replyTo) : undefined,
     });
     const preview = nodemailer.getTestMessageUrl(info) || undefined;
     if (preview) console.log("[email] test preview:", preview);

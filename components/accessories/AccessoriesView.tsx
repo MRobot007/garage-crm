@@ -20,6 +20,7 @@ import {
 } from "@/hooks/useAccessories";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { useSettings } from "@/hooks/useSettings";
+import { useMe } from "@/hooks/useMe";
 import { useStaggerReveal } from "@/hooks/useStaggerReveal";
 import { buildGmailCompose } from "@/lib/order-compose";
 import { ACCESSORY_CATEGORIES } from "@/lib/constants";
@@ -67,8 +68,11 @@ export function AccessoriesView() {
   const [lowOnly, setLowOnly] = useState(false);
 
   const filters = useMemo(() => ({ category, q, lowOnly }), [category, q, lowOnly]);
+  const { data: me } = useMe();
+  const canDelete = me?.role !== "staff";
   const { data: rows, isLoading, isError } = useAccessories(filters);
-  const { data: suppliers } = useSuppliers();
+  // Suppliers is manager+; skip the fetch for staff so it doesn't 403 on load.
+  const { data: suppliers } = useSuppliers(undefined, canDelete);
   const { data: settings } = useSettings();
   const adjust = useAdjustStock();
   const del = useDeleteAccessory();
@@ -241,14 +245,16 @@ export function AccessoriesView() {
                     <Button size="sm" variant="ghost" onClick={() => { setEditing(a); setModalOpen(true); }}>
                       Edit
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-bad hover:bg-red-50"
-                      onClick={() => setToDelete(a)}
-                    >
-                      Delete
-                    </Button>
+                    {canDelete && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-bad hover:bg-red-50"
+                        onClick={() => setToDelete(a)}
+                      >
+                        Delete
+                      </Button>
+                    )}
                   </div>
                 </TD>
               </TR>

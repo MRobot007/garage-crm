@@ -7,10 +7,13 @@ import {
   LEAD_STATUSES,
 } from "./constants";
 
-// Coerce optional-empty-string form fields into undefined.
+// Coerce optional-empty-string form fields into undefined. Length-capped so
+// public/unauthenticated endpoints (e.g. website lead capture) can't be used to
+// store unbounded blobs.
 const optionalStr = z
   .string()
   .trim()
+  .max(1000, "Too long")
   .optional()
   .transform((v) => (v === "" ? undefined : v));
 
@@ -29,11 +32,12 @@ const positiveIntFromNow = z.coerce.number().int().min(0);
 
 // ----------------------------- Lead -----------------------------
 export const leadSchema = z.object({
-  name: z.string().trim().min(2, "Name is required"),
+  name: z.string().trim().min(2, "Name is required").max(120, "Name is too long"),
   phone: phoneSchema,
   email: z
     .string()
     .trim()
+    .max(200, "Email is too long")
     .email("Enter a valid email")
     .optional()
     .or(z.literal(""))

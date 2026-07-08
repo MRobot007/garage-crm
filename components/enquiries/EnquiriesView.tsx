@@ -12,6 +12,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/components/ui/Toast";
 import { useLeads, useUpdateLeadStatus, useDeleteLead } from "@/hooks/useLeads";
 import { useStaggerReveal } from "@/hooks/useStaggerReveal";
+import { useMe } from "@/hooks/useMe";
 import { composeEnquiryReply, buildGmailCompose } from "@/lib/order-compose";
 import { LEAD_STATUS_LABELS, type LeadStatus } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
@@ -26,6 +27,8 @@ export function EnquiriesView() {
   const { data: leads, isLoading, isError } = useLeads(filters);
   const updateStatus = useUpdateLeadStatus();
   const del = useDeleteLead();
+  const { data: me } = useMe();
+  const canDelete = me?.role !== "staff";
 
   const [toDelete, setToDelete] = useState<Lead | null>(null);
   const [replied, setReplied] = useState<Set<string>>(new Set());
@@ -147,6 +150,7 @@ export function EnquiriesView() {
                         ✓ We have it — email
                       </Button>
                     )}
+                    {canDelete && (
                     <Button
                       size="sm"
                       variant="ghost"
@@ -155,6 +159,7 @@ export function EnquiriesView() {
                     >
                       Delete
                     </Button>
+                    )}
                   </div>
                 </TD>
               </TR>

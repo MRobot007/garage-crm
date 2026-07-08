@@ -10,11 +10,14 @@ import type { Supplier } from "@/lib/types";
 import type { SupplierValues } from "@/lib/schemas";
 import { qk } from "./keys";
 
-export function useSuppliers(q?: string) {
+export function useSuppliers(q?: string, enabled = true) {
   const query = q ? `?q=${encodeURIComponent(q)}` : "";
   return useQuery({
     queryKey: [...qk.suppliers, q ?? ""],
     queryFn: () => getJSON<Supplier[]>(`/api/suppliers${query}`),
+    // Suppliers is a manager+ endpoint; callers pass enabled=false for staff to
+    // avoid a guaranteed 403 on pages staff can otherwise see (e.g. Accessories).
+    enabled,
   });
 }
 

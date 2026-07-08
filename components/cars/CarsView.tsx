@@ -19,6 +19,7 @@ import {
   useDeleteCar,
 } from "@/hooks/useCars";
 import { useStaggerReveal } from "@/hooks/useStaggerReveal";
+import { useMe } from "@/hooks/useMe";
 import { CAR_STATUSES, CAR_TYPES } from "@/lib/constants";
 import { formatMoney, formatNumber } from "@/lib/utils";
 import { ApiError } from "@/lib/fetcher";
@@ -34,6 +35,8 @@ export function CarsView() {
   const { data: cars, isLoading, isError } = useCars(filters);
   const updateStatus = useUpdateCarStatus();
   const del = useDeleteCar();
+  const { data: me } = useMe();
+  const canDelete = me?.role !== "staff";
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Car | null>(null);
@@ -187,6 +190,7 @@ export function CarsView() {
                     <Button size="sm" variant="ghost" onClick={() => { setEditing(car); setModalOpen(true); }}>
                       Edit
                     </Button>
+                    {canDelete && (
                     <Button
                       size="sm"
                       variant="ghost"
@@ -195,6 +199,7 @@ export function CarsView() {
                     >
                       Delete
                     </Button>
+                    )}
                   </div>
                 </TD>
               </TR>

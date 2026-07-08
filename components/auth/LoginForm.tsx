@@ -19,6 +19,10 @@ import { Label } from "@/components/ui/shadcn/label";
 import { buttonVariants } from "@/components/ui/shadcn/button";
 import { cn } from "@/lib/shadcn";
 
+// Show the one-tap demo credentials on the login page. Set
+// NEXT_PUBLIC_DEMO_LOGIN=off in the environment to hide it for a real launch.
+const SHOW_DEMO = process.env.NEXT_PUBLIC_DEMO_LOGIN !== "off";
+
 export function LoginForm() {
   const router = useRouter();
   const qc = useQueryClient();
@@ -192,7 +196,8 @@ export function LoginForm() {
         </motion.div>
       </form>
 
-      {/* Demo helper */}
+      {/* Demo helper — hidden when NEXT_PUBLIC_DEMO_LOGIN=off */}
+      {SHOW_DEMO && (
       <motion.button
         variants={item}
         type="button"
@@ -211,6 +216,7 @@ export function LoginForm() {
           Fill
         </span>
       </motion.button>
+      )}
     </motion.div>
   );
 }
