@@ -285,17 +285,21 @@ export function PosView() {
 
   function printReceipt() {
     // Format the page for an 80mm thermal roll — only while printing the
-    // receipt, so the A4 invoice print is never affected.
+    // receipt, so the A4 invoice print is never affected. Cleanup runs on
+    // `afterprint` (NOT a timer) so the bill-sized @page stays applied for the
+    // entire print preview — window.print() returns immediately.
     const style = document.createElement("style");
     style.id = "receipt-page-size";
     style.textContent = "@page { size: 80mm auto; margin: 0 }";
     document.head.appendChild(style);
     document.body.classList.add("printing-receipt");
-    window.print();
-    window.setTimeout(() => {
+    const cleanup = () => {
       document.body.classList.remove("printing-receipt");
       document.getElementById("receipt-page-size")?.remove();
-    }, 600);
+      window.removeEventListener("afterprint", cleanup);
+    };
+    window.addEventListener("afterprint", cleanup);
+    window.print();
   }
 
   const categories = ["Everything", ...ACCESSORY_CATEGORIES, SERVICES_CAT];
