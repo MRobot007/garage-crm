@@ -1,11 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { ok, handle } from "@/lib/api";
 import { FUNNEL_STAGES } from "@/lib/constants";
-import type { DashboardData } from "@/lib/types";
+import type { DashboardData, TrendPoint } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 function startOfMonth(): Date {
   const d = new Date();
@@ -19,6 +20,30 @@ function endOfToday(): Date {
 function dayKey(d: Date): string {
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 }
+function monthKey(d: Date): string {
+  return `${d.getFullYear()}-${d.getMonth()}`;
+}
+/** The last `count` day-starts, oldest → newest. */
+function dayStarts(count: number): Date[] {
+  const t = new Date();
+  t.setHours(0, 0, 0, 0);
+  const out: Date[] = [];
+  for (let i = count - 1; i >= 0; i--) {
+    const d = new Date(t);
+    d.setDate(d.getDate() - i);
+    out.push(d);
+  }
+  return out;
+}
+/** The last `count` month-starts, oldest → newest. */
+function monthStarts(count: number): Date[] {
+  const n = new Date();
+  const out: Date[] = [];
+  for (let i = count - 1; i >= 0; i--) {
+    out.push(new Date(n.getFullYear(), n.getMonth() - i, 1));
+  }
+  return out;
+}
 function pctChange(current: number, prior: number): number | null {
   if (prior <= 0) return null;
   return Math.round(((current - prior) / prior) * 1000) / 10;
@@ -26,18 +51,7 @@ function pctChange(current: number, prior: number): number | null {
 
 export async function GET() {
   return handle(async () => {
-    // 7-day window (00:00 of 6 days ago) and the 14-day window for deltas.
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const days: Date[] = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(d.getDate() - i);
-      days.push(d);
-    }
-    const windowStart = days[0]; // start of the current 7-day window
-    const priorStart = new Date(windowStart);
-    priorStart.setDate(priorStart.getDate() - 7);
+    const yearStart = monthStarts(12)[0]; // earliest bucket we need
 
     const [
       leadCount,
@@ -49,8 +63,8 @@ export async function GET() {
       recentLeadsRaw,
       followUps,
       lowStockAll,
-      leads14,
-      invoices14,
+      leadsYear,
+      invoicesYear,
     ] = await Promise.all([
       prisma.lead.count(),
       prisma.car.count({ where: { status: { not: "Sold" } } }),
@@ -86,11 +100,11 @@ export async function GET() {
       }),
       prisma.accessory.findMany({ orderBy: { qty: "asc" } }),
       prisma.lead.findMany({
-        where: { createdAt: { gte: priorStart } },
+        where: { createdAt: { gte: yearStart } },
         select: { createdAt: true },
       }),
       prisma.invoice.findMany({
-        where: { date: { gte: priorStart } },
+        where: { date: { gte: yearStart } },
         select: { date: true, total: true },
       }),
     ]);
@@ -107,30 +121,57 @@ export async function GET() {
       count: funnelMap.get(stage) ?? 0,
     }));
 
-    // ---- 7-day trend buckets ----
-    const leadDayMap = new Map<string, number>();
-    const salesDayMap = new Map<string, number>();
-    leads14.forEach((l) => {
-      const k = dayKey(new Date(l.createdAt));
-      leadDayMap.set(k, (leadDayMap.get(k) ?? 0) + 1);
+    // ---- Trend buckets (daily + monthly) ----
+    const leadDay = new Map<string, number>();
+    const salesDay = new Map<string, number>();
+    const leadMonth = new Map<string, number>();
+    const salesMonth = new Map<string, number>();
+    leadsYear.forEach((l) => {
+      const d = new Date(l.createdAt);
+      leadDay.set(dayKey(d), (leadDay.get(dayKey(d)) ?? 0) + 1);
+      leadMonth.set(monthKey(d), (leadMonth.get(monthKey(d)) ?? 0) + 1);
     });
-    invoices14.forEach((inv) => {
-      const k = dayKey(new Date(inv.date));
-      salesDayMap.set(k, (salesDayMap.get(k) ?? 0) + inv.total);
+    invoicesYear.forEach((inv) => {
+      const d = new Date(inv.date);
+      salesDay.set(dayKey(d), (salesDay.get(dayKey(d)) ?? 0) + inv.total);
+      salesMonth.set(monthKey(d), (salesMonth.get(monthKey(d)) ?? 0) + inv.total);
     });
-    const trend = days.map((d) => ({
-      label: WEEKDAYS[d.getDay()],
-      leads: leadDayMap.get(dayKey(d)) ?? 0,
-      sales: salesDayMap.get(dayKey(d)) ?? 0,
-    }));
+
+    const daily = (starts: Date[], label: (d: Date) => string): TrendPoint[] =>
+      starts.map((d) => ({
+        label: label(d),
+        leads: leadDay.get(dayKey(d)) ?? 0,
+        sales: salesDay.get(dayKey(d)) ?? 0,
+      }));
+    const monthly = (starts: Date[]): TrendPoint[] =>
+      starts.map((d) => ({
+        label: MONTHS[d.getMonth()],
+        leads: leadMonth.get(monthKey(d)) ?? 0,
+        sales: salesMonth.get(monthKey(d)) ?? 0,
+      }));
+
+    const trend = {
+      week: daily(dayStarts(7), (d) => WEEKDAYS[d.getDay()]),
+      month: daily(dayStarts(30), (d) => `${d.getMonth() + 1}/${d.getDate()}`),
+      sixMonths: monthly(monthStarts(6)),
+      year: monthly(monthStarts(12)),
+    };
 
     // ---- 7d vs prior-7d deltas ----
-    const leadsLast7 = leads14.filter((l) => new Date(l.createdAt) >= windowStart).length;
-    const leadsPrior7 = leads14.length - leadsLast7;
-    const salesLast7 = invoices14
-      .filter((i) => new Date(i.date) >= windowStart)
+    const weekStart = dayStarts(7)[0];
+    const prior7Start = new Date(weekStart);
+    prior7Start.setDate(prior7Start.getDate() - 7);
+    const inRange = (d: Date, from: Date, to: Date) => d >= from && d < to;
+    const leadsLast7 = leadsYear.filter((l) => new Date(l.createdAt) >= weekStart).length;
+    const leadsPrior7 = leadsYear.filter((l) =>
+      inRange(new Date(l.createdAt), prior7Start, weekStart),
+    ).length;
+    const salesLast7 = invoicesYear
+      .filter((i) => new Date(i.date) >= weekStart)
       .reduce((s, i) => s + i.total, 0);
-    const salesPrior7 = invoices14.reduce((s, i) => s + i.total, 0) - salesLast7;
+    const salesPrior7 = invoicesYear
+      .filter((i) => inRange(new Date(i.date), prior7Start, weekStart))
+      .reduce((s, i) => s + i.total, 0);
 
     const lowStock = lowStockAll
       .filter((a) => a.qty <= a.reorderLevel)

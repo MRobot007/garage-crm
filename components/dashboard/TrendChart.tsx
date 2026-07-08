@@ -3,12 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { formatMoney, formatNumber, cn } from "@/lib/utils";
-
-export interface TrendPoint {
-  label: string;
-  leads: number;
-  sales: number;
-}
+import type { TrendPoint, TrendRange } from "@/lib/types";
 
 type Metric = "leads" | "sales";
 
@@ -16,6 +11,13 @@ const METRICS: Record<Metric, { label: string; color: string; light: string }> =
   leads: { label: "New leads", color: "#0d9488", light: "#2dd4bf" },
   sales: { label: "Sales", color: "#059669", light: "#34d399" },
 };
+
+const RANGES: Array<{ key: TrendRange; short: string; sub: string }> = [
+  { key: "week", short: "1W", sub: "last 7 days" },
+  { key: "month", short: "1M", sub: "last 30 days" },
+  { key: "sixMonths", short: "6M", sub: "last 6 months" },
+  { key: "year", short: "1Y", sub: "last 12 months" },
+];
 
 const W = 720;
 const H = 260;
@@ -44,13 +46,15 @@ function smoothLine(pts: Array<[number, number]>): string {
   return d;
 }
 
-export function TrendChart({ data }: { data: TrendPoint[] }) {
+export function TrendChart({ data }: { data: Record<TrendRange, TrendPoint[]> }) {
+  const [range, setRange] = useState<TrendRange>("week");
   const [metric, setMetric] = useState<Metric>("leads");
   const [hover, setHover] = useState<number | null>(null);
 
-  const values = data.map((d) => d[metric]);
+  const series: TrendPoint[] = data[range];
+  const values = series.map((d) => d[metric]);
   const max = Math.max(...values, 1);
-  const n = data.length;
+  const n = series.length;
 
   const x = (i: number) => (n <= 1 ? PAD_X : PAD_X + (i / (n - 1)) * INNER_W);
   const y = (v: number) => PAD_TOP + INNER_H * (1 - v / max);
@@ -63,6 +67,12 @@ export function TrendChart({ data }: { data: TrendPoint[] }) {
 
   const c = METRICS[metric];
   const fmt = (v: number) => (metric === "sales" ? formatMoney(v) : formatNumber(v));
+  const sub = RANGES.find((r) => r.key === range)?.sub ?? "";
+
+  // Keep the x-axis readable: show at most ~8 labels, always show individual
+  // dots only when the series is short enough not to look busy.
+  const labelStep = Math.max(1, Math.ceil(n / 8));
+  const showDots = n <= 12;
 
   function onMove(e: React.MouseEvent<HTMLDivElement>) {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -73,27 +83,45 @@ export function TrendChart({ data }: { data: TrendPoint[] }) {
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between gap-3">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="text-base font-semibold text-ink">Activity — last 7 days</h3>
-          <p className="text-sm text-slate-500">New leads and daily sales</p>
+          <h3 className="text-base font-semibold text-ink">Activity</h3>
+          <p className="text-sm text-slate-500">New leads and sales · {sub}</p>
         </div>
-        <div className="flex rounded-lg bg-slate-500/8 p-0.5">
-          {(Object.keys(METRICS) as Metric[]).map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => setMetric(m)}
-              className={cn(
-                "rounded-md px-3 py-1.5 text-xs font-semibold transition-colors",
-                metric === m
-                  ? "bg-white text-ink shadow-sm"
-                  : "text-slate-500 hover:text-ink",
-              )}
-            >
-              {METRICS[m].label}
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex rounded-lg bg-slate-500/8 p-0.5">
+            {(Object.keys(METRICS) as Metric[]).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMetric(m)}
+                className={cn(
+                  "rounded-md px-3 py-1.5 text-xs font-semibold transition-colors",
+                  metric === m ? "bg-white text-ink shadow-sm" : "text-slate-500 hover:text-ink",
+                )}
+              >
+                {METRICS[m].label}
+              </button>
+            ))}
+          </div>
+          <div className="flex rounded-lg bg-slate-500/8 p-0.5">
+            {RANGES.map((r) => (
+              <button
+                key={r.key}
+                type="button"
+                onClick={() => {
+                  setRange(r.key);
+                  setHover(null);
+                }}
+                className={cn(
+                  "rounded-md px-2.5 py-1.5 text-xs font-semibold transition-colors",
+                  range === r.key ? "bg-white text-ink shadow-sm" : "text-slate-500 hover:text-ink",
+                )}
+              >
+                {r.short}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -106,7 +134,6 @@ export function TrendChart({ data }: { data: TrendPoint[] }) {
             </linearGradient>
           </defs>
 
-          {/* horizontal guides */}
           {[0.25, 0.5, 0.75, 1].map((g) => (
             <line
               key={g}
@@ -120,7 +147,7 @@ export function TrendChart({ data }: { data: TrendPoint[] }) {
           ))}
 
           <motion.path
-            key={`${metric}-area`}
+            key={`${range}-${metric}-area`}
             d={areaPath}
             fill={`url(#area-${metric})`}
             initial={{ opacity: 0 }}
@@ -128,7 +155,7 @@ export function TrendChart({ data }: { data: TrendPoint[] }) {
             transition={{ duration: 0.6 }}
           />
           <motion.path
-            key={`${metric}-line`}
+            key={`${range}-${metric}-line`}
             d={linePath}
             fill="none"
             stroke={c.color}
@@ -136,52 +163,54 @@ export function TrendChart({ data }: { data: TrendPoint[] }) {
             strokeLinecap="round"
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
-            transition={{ duration: 1, ease: "easeInOut" }}
+            transition={{ duration: 0.9, ease: "easeInOut" }}
           />
 
-          {/* day dots */}
-          {points.map((p, i) => (
-            <circle
-              key={i}
-              cx={p[0]}
-              cy={p[1]}
-              r={hover === i ? 5.5 : 3.5}
-              fill="#fff"
-              stroke={c.color}
-              strokeWidth={2}
-              className="transition-all"
-            />
-          ))}
+          {showDots &&
+            points.map((p, i) => (
+              <circle
+                key={i}
+                cx={p[0]}
+                cy={p[1]}
+                r={hover === i ? 5.5 : 3.5}
+                fill="#fff"
+                stroke={c.color}
+                strokeWidth={2}
+                className="transition-all"
+              />
+            ))}
 
-          {/* hover guide */}
           {hover !== null && (
-            <line
-              x1={x(hover)}
-              x2={x(hover)}
-              y1={PAD_TOP}
-              y2={PAD_TOP + INNER_H}
-              stroke={c.light}
-              strokeWidth={1.5}
-              strokeDasharray="4 4"
-            />
+            <>
+              <line
+                x1={x(hover)}
+                x2={x(hover)}
+                y1={PAD_TOP}
+                y2={PAD_TOP + INNER_H}
+                stroke={c.light}
+                strokeWidth={1.5}
+                strokeDasharray="4 4"
+              />
+              <circle cx={x(hover)} cy={y(values[hover])} r={5.5} fill="#fff" stroke={c.color} strokeWidth={2} />
+            </>
           )}
 
-          {/* x labels */}
-          {data.map((d, i) => (
-            <text
-              key={i}
-              x={x(i)}
-              y={H - 10}
-              textAnchor="middle"
-              fontSize="12"
-              fill="rgba(71,85,105,0.75)"
-            >
-              {d.label}
-            </text>
-          ))}
+          {series.map((d, i) =>
+            i % labelStep === 0 || i === n - 1 ? (
+              <text
+                key={i}
+                x={x(i)}
+                y={H - 10}
+                textAnchor="middle"
+                fontSize="12"
+                fill="rgba(71,85,105,0.75)"
+              >
+                {d.label}
+              </text>
+            ) : null,
+          )}
         </svg>
 
-        {/* tooltip */}
         {hover !== null && (
           <div
             className="pointer-events-none absolute -translate-x-1/2 -translate-y-full"
@@ -192,7 +221,7 @@ export function TrendChart({ data }: { data: TrendPoint[] }) {
           >
             <div className="mb-2 whitespace-nowrap rounded-lg bg-ink px-3 py-1.5 text-center shadow-lg">
               <p className="text-sm font-semibold text-white">{fmt(values[hover])}</p>
-              <p className="text-[11px] text-white/60">{data[hover].label}</p>
+              <p className="text-[11px] text-white/60">{series[hover].label}</p>
             </div>
           </div>
         )}

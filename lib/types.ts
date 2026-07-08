@@ -95,6 +95,15 @@ export interface Customer {
   invoices?: Invoice[];
 }
 
+export interface TrendPoint {
+  label: string;
+  leads: number;
+  /** Invoice total for the bucket. */
+  sales: number;
+}
+
+export type TrendRange = "week" | "month" | "sixMonths" | "year";
+
 export interface DashboardData {
   totals: {
     leads: number;
@@ -108,8 +117,8 @@ export interface DashboardData {
     leads: number | null;
     sales: number | null;
   };
-  /** Last 7 days, oldest → newest. `sales` is the invoice total for that day. */
-  trend: { label: string; leads: number; sales: number }[];
+  /** Time-series per selectable range, each oldest → newest. */
+  trend: Record<TrendRange, TrendPoint[]>;
   funnel: { stage: string; count: number }[];
   recentLeads: Pick<
     Lead,
