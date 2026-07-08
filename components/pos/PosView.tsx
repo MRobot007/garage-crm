@@ -1,0 +1,653 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ShoppingCart,
+  History,
+  Home,
+  LogOut,
+  Search,
+  Plus,
+  Minus,
+  Trash2,
+  X,
+  User,
+  Wrench,
+  Package,
+  Banknote,
+  CreditCard,
+  Receipt,
+  Loader2,
+  CheckCircle2,
+} from "lucide-react";
+import { useAccessories } from "@/hooks/useAccessories";
+import { useSettings } from "@/hooks/useSettings";
+import { useCreateInvoice } from "@/hooks/useInvoices";
+import { useToast } from "@/components/ui/Toast";
+import { ACCESSORY_CATEGORIES } from "@/lib/constants";
+import { formatMoney, cn } from "@/lib/utils";
+import { ApiError } from "@/lib/fetcher";
+import { displayFont } from "@/lib/fonts";
+import type { Accessory } from "@/lib/types";
+
+const SERVICES_CAT = "Services";
+
+/** Common garage services offered at the counter (price in USD). */
+const PRESET_SERVICES: { name: string; price: number }[] = [
+  { name: "Oil & Filter Change", price: 60 },
+  { name: "Tire Rotation", price: 40 },
+  { name: "Wheel Alignment", price: 90 },
+  { name: "Brake Inspection", price: 50 },
+  { name: "AC Service & Recharge", price: 120 },
+  { name: "Full Wash & Detail", price: 150 },
+  { name: "Diagnostic Scan", price: 80 },
+  { name: "Battery Replacement", price: 180 },
+];
+
+interface CartLine {
+  key: string;
+  kind: "accessory" | "service";
+  accessoryId?: string;
+  name: string;
+  price: number;
+  qty: number;
+  maxQty?: number;
+  category?: string;
+}
+
+const QUICK_CASH = [10, 20, 50, 100];
+
+export function PosView() {
+  const router = useRouter();
+  const toast = useToast();
+  const { data: accessories } = useAccessories();
+  const { data: settings } = useSettings();
+  const createInvoice = useCreateInvoice();
+
+  const taxPct = settings?.gstPercent ?? 8;
+
+  const [category, setCategory] = useState("Everything");
+  const [q, setQ] = useState("");
+  const [cart, setCart] = useState<CartLine[]>([]);
+  const [held, setHeld] = useState<CartLine[] | null>(null);
+  const [pay, setPay] = useState<"cash" | "card">("cash");
+  const [tender, setTender] = useState(0);
+  const [custName, setCustName] = useState("");
+  const [custPhone, setCustPhone] = useState("");
+  const [custOpen, setCustOpen] = useState(false);
+
+  // ---- Products (accessories) ----
+  const products = useMemo(() => {
+    const rows = accessories ?? [];
+    const needle = q.trim().toLowerCase();
+    return rows.filter((a) => {
+      const inCat = category === "Everything" || a.category === category;
+      const match =
+        !needle ||
+        a.name.toLowerCase().includes(needle) ||
+        a.sku.toLowerCase().includes(needle);
+      return inCat && match;
+    });
+  }, [accessories, category, q]);
+
+  const serviceMatches = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    return PRESET_SERVICES.filter((s) => !needle || s.name.toLowerCase().includes(needle));
+  }, [q]);
+
+  const showServices = category === "Everything" || category === SERVICES_CAT;
+  const showProducts = category !== SERVICES_CAT;
+
+  // ---- Cart maths ----
+  const subtotal = cart.reduce((s, l) => s + l.price * l.qty, 0);
+  const tax = Math.round((subtotal * taxPct) / 100);
+  const total = subtotal + tax;
+  const itemCount = cart.reduce((s, l) => s + l.qty, 0);
+  const change = pay === "cash" ? Math.max(0, tender - total) : 0;
+  const canComplete =
+    cart.length > 0 && !createInvoice.isPending && (pay === "card" || tender >= total);
+
+  // ---- Cart ops ----
+  function addAccessory(a: Accessory) {
+    if (a.qty <= 0) {
+      toast.info(`${a.name} is out of stock`);
+      return;
+    }
+    setCart((prev) => {
+      const found = prev.find((l) => l.accessoryId === a.id);
+      if (found) {
+        if (found.qty >= a.qty) {
+          toast.info(`Only ${a.qty} in stock`);
+          return prev;
+        }
+        return prev.map((l) => (l.key === found.key ? { ...l, qty: l.qty + 1 } : l));
+      }
+      return [
+        ...prev,
+        {
+          key: `acc-${a.id}`,
+          kind: "accessory",
+          accessoryId: a.id,
+          name: a.name,
+          price: a.sellPrice,
+          qty: 1,
+          maxQty: a.qty,
+          category: a.category,
+        },
+      ];
+    });
+  }
+
+  function addService(name: string, price: number) {
+    setCart((prev) => {
+      const found = prev.find((l) => l.kind === "service" && l.name === name && l.price === price);
+      if (found) return prev.map((l) => (l.key === found.key ? { ...l, qty: l.qty + 1 } : l));
+      return [
+        ...prev,
+        { key: `svc-${name}-${Date.now()}`, kind: "service", name, price, qty: 1, category: SERVICES_CAT },
+      ];
+    });
+  }
+
+  function setQty(key: string, next: number) {
+    setCart((prev) =>
+      prev
+        .map((l) =>
+          l.key === key
+            ? { ...l, qty: Math.max(0, Math.min(next, l.maxQty ?? 999)) }
+            : l,
+        )
+        .filter((l) => l.qty > 0),
+    );
+  }
+
+  function removeLine(key: string) {
+    setCart((prev) => prev.filter((l) => l.key !== key));
+  }
+
+  function clearCart() {
+    setCart([]);
+    setTender(0);
+  }
+
+  function addManualItem() {
+    const name = window.prompt("Item / service name");
+    if (!name?.trim()) return;
+    const priceStr = window.prompt(`Price for “${name.trim()}” (USD)`, "0");
+    const price = Math.max(0, Math.round(Number(priceStr) || 0));
+    addService(name.trim(), price);
+  }
+
+  function holdBill() {
+    if (cart.length === 0) return;
+    setHeld(cart);
+    clearCart();
+    toast.success("Bill held");
+  }
+  function resumeBill() {
+    if (!held) return;
+    setCart(held);
+    setHeld(null);
+  }
+
+  async function logout() {
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+    router.push("/login");
+  }
+
+  async function completeSale() {
+    if (!canComplete) return;
+    try {
+      const inv = await createInvoice.mutateAsync({
+        customerName: custName.trim() || "Walk-in Customer",
+        customerPhone: custPhone.trim() || "0000000000",
+        items: cart
+          .filter((l) => l.kind === "accessory")
+          .map((l) => ({ accessoryId: l.accessoryId!, name: l.name, qty: l.qty, price: l.price })),
+        services: cart
+          .filter((l) => l.kind === "service")
+          .map((l) => ({ name: l.name, qty: l.qty, price: l.price })),
+        discount: 0,
+        gstPercent: taxPct,
+        received: total,
+      } as never);
+      const changeMsg = pay === "cash" && change > 0 ? ` · Change ${formatMoney(change)}` : "";
+      toast.success(`Sale complete — ${(inv as { invoiceNo?: string }).invoiceNo ?? ""}${changeMsg}`);
+      clearCart();
+      setCustName("");
+      setCustPhone("");
+      setCustOpen(false);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Couldn’t complete the sale");
+    }
+  }
+
+  const categories = ["Everything", ...ACCESSORY_CATEGORIES, SERVICES_CAT];
+
+  return (
+    <div className="flex h-screen overflow-hidden bg-[linear-gradient(158deg,#f3f7f6_0%,#eef3f3_46%,#f6f3ef_100%)] text-ink">
+      {/* Icon rail */}
+      <aside className="flex w-16 shrink-0 flex-col items-center gap-1 bg-[linear-gradient(180deg,#0c4a45_0%,#0a3a37_50%,#062725_100%)] py-4 text-teal-100">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo.png" alt="VOZIDEX" className="mb-3 h-10 w-10 object-contain" />
+        <RailButton label="Register" active icon={<ShoppingCart className="h-5 w-5" />} />
+        <RailLink href="/" label="Dashboard" icon={<Home className="h-5 w-5" />} />
+        <RailLink href="/invoices" label="Sales history" icon={<History className="h-5 w-5" />} />
+        <RailLink href="/accessories" label="Inventory" icon={<Package className="h-5 w-5" />} />
+        <button
+          onClick={logout}
+          title="Log out"
+          className="mt-auto grid h-11 w-11 place-items-center rounded-xl text-teal-100/70 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          <LogOut className="h-5 w-5" />
+        </button>
+      </aside>
+
+      {/* Category rail */}
+      <aside className="hidden w-28 shrink-0 overflow-y-auto border-r border-line/70 bg-white/40 px-2 py-4 sm:block">
+        <div className="space-y-2">
+          {categories.map((c) => {
+            const active = category === c;
+            return (
+              <button
+                key={c}
+                onClick={() => setCategory(c)}
+                className={cn(
+                  "flex w-full flex-col items-center gap-1.5 rounded-xl border px-1.5 py-3 text-center text-[11px] font-semibold leading-tight transition-all",
+                  active
+                    ? "border-transparent bg-gradient-to-br from-brand to-teal-700 text-white shadow-md shadow-brand/25"
+                    : "border-line bg-white/70 text-slate-500 hover:border-brand/40 hover:text-ink",
+                )}
+              >
+                {c === SERVICES_CAT ? (
+                  <Wrench className="h-4 w-4" />
+                ) : (
+                  <Package className="h-4 w-4" />
+                )}
+                <span className="line-clamp-2">{c}</span>
+              </button>
+            );
+          })}
+        </div>
+      </aside>
+
+      {/* Products */}
+      <main className="flex min-w-0 flex-1 flex-col">
+        <header className="shrink-0 border-b border-line/70 px-5 py-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h1 className={cn(displayFont.className, "flex items-center gap-2 text-2xl font-bold uppercase tracking-wide text-ink")}>
+                VOZIDEX POS
+                <span className="h-2 w-2 animate-pulse rounded-full bg-ok" />
+              </h1>
+              <p className="text-xs font-medium uppercase tracking-wider text-brand">
+                Terminal secured &amp; live
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <TopButton onClick={addManualItem} icon={<Plus className="h-4 w-4" />}>
+                Manual item
+              </TopButton>
+              {held && (
+                <TopButton onClick={resumeBill} icon={<History className="h-4 w-4" />}>
+                  Resume (1)
+                </TopButton>
+              )}
+              <TopButton onClick={() => setCustOpen((o) => !o)} icon={<User className="h-4 w-4" />} primary>
+                Add customer
+              </TopButton>
+            </div>
+          </div>
+
+          <div className="relative mt-3">
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search products or services…"
+              className="glass-input h-11 w-full rounded-xl pl-10 pr-3 text-sm outline-none"
+            />
+          </div>
+
+          <AnimatePresence>
+            {custOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <input
+                    value={custName}
+                    onChange={(e) => setCustName(e.target.value)}
+                    placeholder="Customer name (optional)"
+                    className="glass-input h-9 w-48 rounded-lg px-3 text-sm outline-none"
+                  />
+                  <input
+                    value={custPhone}
+                    onChange={(e) => setCustPhone(e.target.value)}
+                    placeholder="Phone"
+                    className="glass-input h-9 w-40 rounded-lg px-3 text-sm outline-none"
+                  />
+                  <span className="text-xs text-slate-400">Leave blank for a walk-in sale.</span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </header>
+
+        <div className="flex-1 overflow-y-auto p-5">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            {showServices &&
+              serviceMatches.map((s) => (
+                <button
+                  key={s.name}
+                  onClick={() => addService(s.name, s.price)}
+                  className="glass group flex flex-col rounded-2xl p-3 text-left transition-transform hover:-translate-y-0.5"
+                >
+                  <div className="mb-3 flex items-center justify-between">
+                    <span className="rounded-md bg-brand/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-brand">
+                      Service
+                    </span>
+                  </div>
+                  <div className="mb-3 grid h-16 place-items-center rounded-xl bg-brand/5 text-brand">
+                    <Wrench className="h-7 w-7" />
+                  </div>
+                  <p className="truncate text-sm font-medium text-ink">{s.name}</p>
+                  <p className="mt-0.5 text-base font-semibold tabular-nums text-ink">
+                    {formatMoney(s.price)}
+                  </p>
+                </button>
+              ))}
+
+            {showProducts &&
+              products.map((a) => {
+                const out = a.qty <= 0;
+                return (
+                  <button
+                    key={a.id}
+                    onClick={() => addAccessory(a)}
+                    disabled={out}
+                    className={cn(
+                      "glass group flex flex-col rounded-2xl p-3 text-left transition-transform",
+                      out ? "cursor-not-allowed opacity-50" : "hover:-translate-y-0.5",
+                    )}
+                  >
+                    <div className="mb-3 flex items-center justify-between">
+                      <span
+                        className={cn(
+                          "rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase",
+                          a.lowStock ? "bg-amber-100 text-amber-700" : "bg-teal-100 text-teal-700",
+                        )}
+                      >
+                        {a.qty} in stock
+                      </span>
+                    </div>
+                    <div className="mb-3 grid h-16 place-items-center rounded-xl bg-slate-500/5 text-slate-400">
+                      <Package className="h-7 w-7" />
+                    </div>
+                    <p className="truncate text-sm font-medium text-ink">{a.name}</p>
+                    <div className="mt-0.5 flex items-baseline justify-between gap-2">
+                      <p className="text-base font-semibold tabular-nums text-ink">
+                        {formatMoney(a.sellPrice)}
+                      </p>
+                      <span className="truncate text-[11px] uppercase text-brand">{a.category}</span>
+                    </div>
+                  </button>
+                );
+              })}
+
+            {showProducts && products.length === 0 && !showServices && (
+              <p className="col-span-full py-16 text-center text-sm text-slate-400">
+                No products match.
+              </p>
+            )}
+          </div>
+        </div>
+      </main>
+
+      {/* Checkout */}
+      <aside className="hidden w-[360px] shrink-0 flex-col border-l border-line/70 bg-white/70 backdrop-blur lg:flex xl:w-[380px]">
+        <div className="flex items-center justify-between px-5 py-4">
+          <h2 className="flex items-center gap-2 text-base font-semibold text-ink">
+            Checkout
+            <span className="grid h-5 min-w-5 place-items-center rounded-full bg-brand px-1.5 text-xs font-bold text-white">
+              {itemCount}
+            </span>
+          </h2>
+          <button
+            onClick={clearCart}
+            disabled={cart.length === 0}
+            title="Clear cart"
+            className="grid h-9 w-9 place-items-center rounded-lg text-slate-400 transition-colors hover:bg-red-50 hover:text-bad disabled:opacity-40"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Payment method */}
+        <div className="grid grid-cols-2 gap-2 px-5">
+          {(["cash", "card"] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => setPay(m)}
+              className={cn(
+                "flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold capitalize transition-all",
+                pay === m
+                  ? "bg-gradient-to-b from-brand to-teal-700 text-white shadow-md shadow-brand/25"
+                  : "glass-soft text-slate-500 hover:text-ink",
+              )}
+            >
+              {m === "cash" ? <Banknote className="h-4 w-4" /> : <CreditCard className="h-4 w-4" />}
+              {m}
+            </button>
+          ))}
+        </div>
+
+        {/* Cash tender */}
+        {pay === "cash" && (
+          <div className="mt-3 px-5">
+            <div className="rounded-xl bg-teal-50/70 p-3">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                  Received $
+                </label>
+                <span className="text-xs text-slate-500">
+                  Change{" "}
+                  <span className="font-semibold text-ok">{formatMoney(change)}</span>
+                </span>
+              </div>
+              <input
+                type="number"
+                min={0}
+                value={tender || ""}
+                onChange={(e) => setTender(Math.max(0, Number(e.target.value) || 0))}
+                placeholder="0.00"
+                className="mt-1 w-full bg-transparent text-2xl font-semibold tabular-nums text-ink outline-none"
+              />
+              <div className="mt-2 grid grid-cols-4 gap-1.5">
+                {QUICK_CASH.map((amt) => (
+                  <button
+                    key={amt}
+                    onClick={() => setTender((t) => t + amt)}
+                    className="rounded-lg border border-teal-200 bg-white/70 py-1.5 text-xs font-semibold text-brand transition-colors hover:bg-brand hover:text-white"
+                  >
+                    +${amt}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Cart lines */}
+        <div className="mt-3 min-h-0 flex-1 overflow-y-auto px-5">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+            Bill items · {cart.length}
+          </p>
+          {cart.length === 0 ? (
+            <div className="grid place-items-center py-14 text-center text-slate-300">
+              <ShoppingCart className="h-12 w-12" />
+              <p className="mt-2 text-sm font-medium text-slate-400">Empty cart</p>
+              <p className="text-xs text-slate-400">Tap a product or service to add it.</p>
+            </div>
+          ) : (
+            <ul className="space-y-2">
+              {cart.map((l) => (
+                <li key={l.key} className="glass-soft flex items-center gap-2 rounded-xl p-2.5">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-ink">{l.name}</p>
+                    <p className="text-xs text-slate-500">
+                      {formatMoney(l.price)}
+                      {l.kind === "service" && " · service"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setQty(l.key, l.qty - 1)}
+                      className="grid h-6 w-6 place-items-center rounded-md bg-white/80 text-slate-600 hover:bg-white"
+                    >
+                      <Minus className="h-3.5 w-3.5" />
+                    </button>
+                    <span className="w-6 text-center text-sm font-semibold tabular-nums">{l.qty}</span>
+                    <button
+                      onClick={() => setQty(l.key, l.qty + 1)}
+                      disabled={l.maxQty !== undefined && l.qty >= l.maxQty}
+                      className="grid h-6 w-6 place-items-center rounded-md bg-white/80 text-slate-600 hover:bg-white disabled:opacity-40"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                  <span className="w-16 text-right text-sm font-semibold tabular-nums text-ink">
+                    {formatMoney(l.price * l.qty)}
+                  </span>
+                  <button
+                    onClick={() => removeLine(l.key)}
+                    className="grid h-6 w-6 place-items-center rounded-md text-slate-300 hover:text-bad"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Totals + actions */}
+        <div className="border-t border-line/70 px-5 py-4">
+          <dl className="space-y-1 text-sm">
+            <div className="flex justify-between text-slate-500">
+              <dt>Subtotal</dt>
+              <dd className="tabular-nums">{formatMoney(subtotal)}</dd>
+            </div>
+            <div className="flex justify-between text-slate-500">
+              <dt>Tax ({taxPct}%)</dt>
+              <dd className="tabular-nums">{formatMoney(tax)}</dd>
+            </div>
+            <div className="mt-1 flex items-baseline justify-between border-t border-line/70 pt-2">
+              <dt className="font-semibold text-ink">Grand total</dt>
+              <dd className="text-xl font-bold tabular-nums text-ink">{formatMoney(total)}</dd>
+            </div>
+          </dl>
+
+          <div className="mt-3 grid grid-cols-[auto_1fr] gap-2">
+            <button
+              onClick={holdBill}
+              disabled={cart.length === 0}
+              className="flex items-center gap-1.5 rounded-xl border border-line px-3 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-40"
+            >
+              <Receipt className="h-4 w-4" /> Hold
+            </button>
+            <button
+              onClick={completeSale}
+              disabled={!canComplete}
+              className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-brand to-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-md shadow-brand/25 transition-all hover:brightness-[1.08] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
+            >
+              {createInvoice.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <CheckCircle2 className="h-4 w-4" />
+              )}
+              {pay === "cash" && tender > 0 && tender < total
+                ? "Insufficient cash"
+                : "Complete payment"}
+            </button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  );
+}
+
+function RailButton({
+  icon,
+  label,
+  active,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  active?: boolean;
+}) {
+  return (
+    <span
+      title={label}
+      className={cn(
+        "grid h-11 w-11 place-items-center rounded-xl",
+        active ? "bg-white/15 text-white ring-1 ring-inset ring-white/15" : "text-teal-100/70",
+      )}
+    >
+      {icon}
+    </span>
+  );
+}
+
+function RailLink({
+  href,
+  icon,
+  label,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <Link
+      href={href}
+      title={label}
+      className="grid h-11 w-11 place-items-center rounded-xl text-teal-100/70 transition-colors hover:bg-white/10 hover:text-white"
+    >
+      {icon}
+    </Link>
+  );
+}
+
+function TopButton({
+  children,
+  onClick,
+  icon,
+  primary,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  icon: React.ReactNode;
+  primary?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide transition-all active:scale-[0.97]",
+        primary
+          ? "bg-gradient-to-b from-brand to-teal-700 text-white shadow-md shadow-brand/25 hover:brightness-[1.08]"
+          : "glass-soft text-slate-600 hover:text-ink",
+      )}
+    >
+      {icon}
+      {children}
+    </button>
+  );
+}

@@ -115,6 +115,14 @@ export const invoiceItemSchema = z.object({
   price: nonNegInt,
 });
 
+// A manual / service line (e.g. labour, a garage service, or a custom item).
+// It has no catalog entry, so its price is entered at the point of sale.
+export const serviceItemSchema = z.object({
+  name: z.string().trim().min(1, "Name required").max(120),
+  qty: z.coerce.number().int().min(1, "Qty must be at least 1").max(999),
+  price: nonNegInt,
+});
+
 export const invoiceSchema = z
   .object({
     // customer: either an existing id, or new name+phone.
@@ -124,6 +132,7 @@ export const invoiceSchema = z
     customerEmail: optionalStr,
     carId: optionalStr,
     items: z.array(invoiceItemSchema).default([]),
+    services: z.array(serviceItemSchema).default([]),
     discount: nonNegInt.default(0),
     gstPercent: nonNegInt.default(8),
     received: nonNegInt.default(0),
@@ -134,10 +143,16 @@ export const invoiceSchema = z
     message: "Choose a customer or enter a name and phone",
     path: ["customerName"],
   })
-  .refine((v) => Boolean(v.carId) || (v.items && v.items.length > 0), {
-    message: "Add a car and/or at least one accessory",
-    path: ["items"],
-  });
+  .refine(
+    (v) =>
+      Boolean(v.carId) ||
+      (v.items && v.items.length > 0) ||
+      (v.services && v.services.length > 0),
+    {
+      message: "Add a car, an accessory, or a service",
+      path: ["items"],
+    },
+  );
 export type InvoiceInput = z.input<typeof invoiceSchema>;
 export type InvoiceValues = z.infer<typeof invoiceSchema>;
 

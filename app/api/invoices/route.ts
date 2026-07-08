@@ -120,6 +120,17 @@ export async function POST(req: Request) {
           });
         }
 
+        // 3b) Manual / service lines (no catalog, no stock — price entered at POS).
+        for (const svc of v.services ?? []) {
+          lineData.push({
+            kind: "service",
+            accessoryId: null,
+            name: svc.name,
+            qty: svc.qty,
+            price: svc.price,
+          });
+        }
+
         // 4) Compute authoritative totals.
         const totals = computeTotals({
           items: lineData.map((l) => ({ qty: l.qty, price: l.price })),

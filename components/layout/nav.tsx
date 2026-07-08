@@ -38,6 +38,17 @@ export const NAV_ITEMS: NavItem[] = [
     ),
   },
   {
+    href: "/pos",
+    label: "POS Terminal",
+    icon: (
+      <Svg>
+        <circle cx="9" cy="20" r="1.4" />
+        <circle cx="17" cy="20" r="1.4" />
+        <path d="M2 4h2.2l2.3 11.5a1 1 0 0 0 1 .8h8.8a1 1 0 0 0 1-.8L20 8H6.2" />
+      </Svg>
+    ),
+  },
+  {
     href: "/leads",
     label: "Leads",
     icon: (

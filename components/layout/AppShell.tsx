@@ -20,8 +20,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     };
   }, [drawerOpen]);
 
-  // The login screen renders standalone, without the sidebar/top bar.
-  if (pathname === "/login") {
+  // The login screen and the POS terminal render standalone (full-screen),
+  // without the sidebar/top bar.
+  if (pathname === "/login" || pathname === "/pos") {
     return <>{children}</>;
   }
 
