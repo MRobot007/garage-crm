@@ -13,6 +13,7 @@ const METRICS: Record<Metric, { label: string; color: string; light: string }> =
 };
 
 const RANGES: Array<{ key: TrendRange; short: string; sub: string }> = [
+  { key: "today", short: "1D", sub: "today, by hour" },
   { key: "week", short: "1W", sub: "last 7 days" },
   { key: "month", short: "1M", sub: "last 30 days" },
   { key: "sixMonths", short: "6M", sub: "last 6 months" },

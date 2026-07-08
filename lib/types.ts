@@ -102,7 +102,7 @@ export interface TrendPoint {
   sales: number;
 }
 
-export type TrendRange = "week" | "month" | "sixMonths" | "year";
+export type TrendRange = "today" | "week" | "month" | "sixMonths" | "year";
 
 export interface DashboardData {
   totals: {

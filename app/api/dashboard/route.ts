@@ -44,6 +44,11 @@ function monthStarts(count: number): Date[] {
   }
   return out;
 }
+function hourLabel(h: number): string {
+  const ampm = h < 12 ? "a" : "p";
+  const hr = h % 12 === 0 ? 12 : h % 12;
+  return `${hr}${ampm}`;
+}
 function pctChange(current: number, prior: number): number | null {
   if (prior <= 0) return null;
   return Math.round(((current - prior) / prior) * 1000) / 10;
@@ -150,7 +155,27 @@ export async function GET() {
         sales: salesMonth.get(monthKey(d)) ?? 0,
       }));
 
+    // Today, bucketed by hour (00:00 → 23:00).
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const leadHour = new Array(24).fill(0);
+    const salesHour = new Array(24).fill(0);
+    leadsYear.forEach((l) => {
+      const d = new Date(l.createdAt);
+      if (d >= todayStart) leadHour[d.getHours()] += 1;
+    });
+    invoicesYear.forEach((inv) => {
+      const d = new Date(inv.date);
+      if (d >= todayStart) salesHour[d.getHours()] += inv.total;
+    });
+    const today: TrendPoint[] = Array.from({ length: 24 }, (_, h) => ({
+      label: hourLabel(h),
+      leads: leadHour[h],
+      sales: salesHour[h],
+    }));
+
     const trend = {
+      today,
       week: daily(dayStarts(7), (d) => WEEKDAYS[d.getDay()]),
       month: daily(dayStarts(30), (d) => `${d.getMonth() + 1}/${d.getDate()}`),
       sixMonths: monthly(monthStarts(6)),
