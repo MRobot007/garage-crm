@@ -110,7 +110,7 @@ export function InvoiceDetailView({ id }: { id: string }) {
                 <td className="py-2.5">
                   {it.name}
                   {it.kind === "car" && (
-                    <span className="ml-2 rounded bg-teal-100 px-1.5 py-0.5 text-[10px] font-medium uppercase text-teal-800">
+                    <span className="ml-2 rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-medium uppercase text-red-800">
                       Car
                     </span>
                   )}

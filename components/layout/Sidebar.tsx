@@ -30,7 +30,7 @@ export function Sidebar({ collapsed, onNavigate }: SidebarProps) {
   return (
     <nav
       aria-label="Main navigation"
-      className="flex h-full flex-col gap-1 bg-[linear-gradient(180deg,#0c4a45_0%,#0a3a37_50%,#062725_100%)] p-3 text-teal-50"
+      className="flex h-full flex-col gap-1 bg-[linear-gradient(180deg,#20242c_0%,#191c22_50%,#101216_100%)] p-3 text-red-50"
     >
       <div
         className={cn(
@@ -63,7 +63,7 @@ export function Sidebar({ collapsed, onNavigate }: SidebarProps) {
             className={cn(
               "relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
               collapsed && "justify-center px-0",
-              active ? "text-white" : "text-teal-50/70 hover:bg-white/[0.08] hover:text-white",
+              active ? "text-white" : "text-red-50/70 hover:bg-white/[0.08] hover:text-white",
             )}
           >
             {active && (
@@ -81,7 +81,7 @@ export function Sidebar({ collapsed, onNavigate }: SidebarProps) {
       })}
 
       {!collapsed && (
-        <p className="mt-auto px-3 pt-4 text-xs text-teal-100/45">
+        <p className="mt-auto px-3 pt-4 text-xs text-red-100/45">
           VOZIDEX Customs · USA
         </p>
       )}

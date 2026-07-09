@@ -87,7 +87,7 @@ export function DonutChart({
             cy={c}
             r={r}
             fill="none"
-            stroke="rgba(15,60,55,0.06)"
+            stroke="rgba(20, 24, 32,0.06)"
             strokeWidth={stroke}
           />
           {arcs.map((a, i) => (

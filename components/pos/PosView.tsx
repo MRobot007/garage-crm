@@ -94,7 +94,7 @@ function tiltMove(e: React.MouseEvent<HTMLElement>) {
   const rx = (0.5 - py) * 5;
   const ry = (px - 0.5) * 5;
   el.style.transform = `perspective(700px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-3px)`;
-  el.style.boxShadow = `${-ry * 2}px ${14 - rx * 2}px 30px -14px rgba(15, 60, 55, 0.4)`;
+  el.style.boxShadow = `${-ry * 2}px ${14 - rx * 2}px 30px -14px rgba(20, 24, 32, 0.4)`;
 }
 function tiltLeave(e: React.MouseEvent<HTMLElement>) {
   e.currentTarget.style.transform = "";
@@ -356,13 +356,13 @@ export function PosView() {
       {/* Full navigation sidebar — every section the user can access.
           Toggled off with the hamburger for more product space. */}
       {navOpen && (
-        <aside className="hidden w-60 shrink-0 flex-col bg-[linear-gradient(180deg,#0c4a45_0%,#0a3a37_50%,#062725_100%)] md:flex">
+        <aside className="hidden w-60 shrink-0 flex-col bg-[linear-gradient(180deg,#20242c_0%,#191c22_50%,#101216_100%)] md:flex">
           <div className="min-h-0 flex-1 overflow-y-auto">
             <Sidebar collapsed={false} />
           </div>
           <button
             onClick={logout}
-            className="flex items-center gap-3 border-t border-white/10 px-6 py-3 text-sm font-medium text-teal-50/70 transition-colors hover:bg-white/10 hover:text-white"
+            className="flex items-center gap-3 border-t border-white/10 px-6 py-3 text-sm font-medium text-red-50/70 transition-colors hover:bg-white/10 hover:text-white"
           >
             <LogOut className="h-5 w-5" /> Log out
           </button>
@@ -381,7 +381,7 @@ export function PosView() {
                 className={cn(
                   "flex w-full flex-col items-center gap-1.5 rounded-xl border px-1.5 py-3 text-center text-[11px] font-semibold leading-tight transition-all",
                   active
-                    ? "border-transparent bg-gradient-to-br from-brand to-teal-700 text-white shadow-md shadow-brand/25"
+                    ? "border-transparent bg-gradient-to-br from-brand to-red-700 text-white shadow-md shadow-brand/25"
                     : "border-line bg-white/70 text-slate-500 hover:border-brand/40 hover:text-ink",
                 )}
               >
@@ -491,7 +491,7 @@ export function PosView() {
               className={cn(
                 "shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
                 category === c
-                  ? "bg-gradient-to-b from-brand to-teal-700 text-white"
+                  ? "bg-gradient-to-b from-brand to-red-700 text-white"
                   : "glass-soft text-slate-500",
               )}
             >
@@ -549,7 +549,7 @@ export function PosView() {
                       <span
                         className={cn(
                           "rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase",
-                          a.lowStock ? "bg-amber-100 text-amber-700" : "bg-teal-100 text-teal-700",
+                          a.lowStock ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700",
                         )}
                       >
                         {a.qty} in stock
@@ -623,7 +623,7 @@ export function PosView() {
               className={cn(
                 "flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold capitalize transition-all",
                 pay === m
-                  ? "bg-gradient-to-b from-brand to-teal-700 text-white shadow-md shadow-brand/25"
+                  ? "bg-gradient-to-b from-brand to-red-700 text-white shadow-md shadow-brand/25"
                   : "glass-soft text-slate-500 hover:text-ink",
               )}
             >
@@ -642,7 +642,7 @@ export function PosView() {
         {/* Cash / split tender */}
         {pay !== "card" && (
           <div className="mt-3 px-5">
-            <div className="rounded-xl bg-teal-50/70 p-3">
+            <div className="rounded-xl bg-red-50/70 p-3">
               <div className="flex items-center justify-between">
                 <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                   {pay === "split" ? "Cash part $" : "Received $"}
@@ -665,7 +665,7 @@ export function PosView() {
                   <button
                     key={amt}
                     onClick={() => setTender((t) => t + amt)}
-                    className="rounded-lg border border-teal-200 bg-white/70 py-1.5 text-xs font-semibold text-brand transition-colors hover:bg-brand hover:text-white"
+                    className="rounded-lg border border-red-200 bg-white/70 py-1.5 text-xs font-semibold text-brand transition-colors hover:bg-brand hover:text-white"
                   >
                     +${amt}
                   </button>
@@ -684,7 +684,7 @@ export function PosView() {
         )}
         {pay === "card" && (
           <div className="mt-3 px-5">
-            <div className="flex items-center gap-2 rounded-xl bg-teal-50/70 p-3 text-sm text-slate-600">
+            <div className="flex items-center gap-2 rounded-xl bg-red-50/70 p-3 text-sm text-slate-600">
               <CreditCard className="h-4 w-4 text-brand" />
               Charge <span className="font-semibold text-ink">{formatMoney(total)}</span> to card
             </div>
@@ -772,7 +772,7 @@ export function PosView() {
             <button
               onClick={completeSale}
               disabled={!canComplete}
-              className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-brand to-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-md shadow-brand/25 transition-all hover:brightness-[1.08] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
+              className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-brand to-red-700 px-4 py-3 text-sm font-semibold text-white shadow-md shadow-brand/25 transition-all hover:brightness-[1.08] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
             >
               {createInvoice.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -791,7 +791,7 @@ export function PosView() {
       {!cartOpen && (
         <button
           onClick={() => setCartOpen(true)}
-          className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-3 bg-gradient-to-b from-brand to-teal-700 px-5 py-3.5 text-white shadow-2xl lg:hidden"
+          className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-3 bg-gradient-to-b from-brand to-red-700 px-5 py-3.5 text-white shadow-2xl lg:hidden"
         >
           <span className="flex items-center gap-2 font-semibold">
             <ShoppingCart className="h-5 w-5" />
@@ -811,13 +811,13 @@ export function PosView() {
             onClick={() => setNavDrawer(false)}
             aria-hidden
           />
-          <aside className="absolute left-0 top-0 flex h-full w-64 flex-col bg-[linear-gradient(180deg,#0c4a45_0%,#0a3a37_50%,#062725_100%)] shadow-2xl">
+          <aside className="absolute left-0 top-0 flex h-full w-64 flex-col bg-[linear-gradient(180deg,#20242c_0%,#191c22_50%,#101216_100%)] shadow-2xl">
             <div className="min-h-0 flex-1 overflow-y-auto">
               <Sidebar collapsed={false} onNavigate={() => setNavDrawer(false)} />
             </div>
             <button
               onClick={logout}
-              className="flex items-center gap-3 border-t border-white/10 px-6 py-3 text-sm font-medium text-teal-50/70 transition-colors hover:bg-white/10 hover:text-white"
+              className="flex items-center gap-3 border-t border-white/10 px-6 py-3 text-sm font-medium text-red-50/70 transition-colors hover:bg-white/10 hover:text-white"
             >
               <LogOut className="h-5 w-5" /> Log out
             </button>
@@ -944,7 +944,7 @@ export function PosView() {
                 </button>
                 <button
                   onClick={() => setSale(null)}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-brand to-teal-700 py-2.5 text-sm font-semibold text-white shadow-md shadow-brand/25 transition-all hover:brightness-[1.08] active:scale-[0.97]"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-brand to-red-700 py-2.5 text-sm font-semibold text-white shadow-md shadow-brand/25 transition-all hover:brightness-[1.08] active:scale-[0.97]"
                 >
                   New sale
                 </button>
@@ -974,7 +974,7 @@ function TopButton({
       className={cn(
         "inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide transition-all active:scale-[0.97]",
         primary
-          ? "bg-gradient-to-b from-brand to-teal-700 text-white shadow-md shadow-brand/25 hover:brightness-[1.08]"
+          ? "bg-gradient-to-b from-brand to-red-700 text-white shadow-md shadow-brand/25 hover:brightness-[1.08]"
           : "glass-soft text-slate-600 hover:text-ink",
       )}
     >

@@ -15,11 +15,11 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          DEFAULT: "#0d9488", // teal-600 — calm, elegant accent
-          hover: "#0f766e", // teal-700
+          DEFAULT: "#e11f26", // racing red — from the VOZIDEX Customs logo
+          hover: "#b8171d", // darker red
         },
-        ink: "#243b3a", // deep teal-tinted charcoal (primary text)
-        line: "#dfe6e4", // soft cool border
+        ink: "#1b1e24", // graphite charcoal (primary text)
+        line: "#e2e5ea", // neutral steel border
         // status
         ok: "#0f9d76",
         warn: "#c98a2b",

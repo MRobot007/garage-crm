@@ -9,7 +9,7 @@ import { formatMoney, formatNumber, cn } from "@/lib/utils";
 type Accent = "teal" | "emerald" | "cyan" | "amber" | "violet" | "rose";
 
 const ACCENTS: Record<Accent, { chip: string; bar: string }> = {
-  teal: { chip: "from-teal-500 to-teal-600", bar: "from-teal-400 to-teal-600" },
+  teal: { chip: "from-red-500 to-red-600", bar: "from-red-400 to-red-600" },
   emerald: { chip: "from-emerald-500 to-emerald-600", bar: "from-emerald-400 to-emerald-600" },
   cyan: { chip: "from-cyan-500 to-cyan-600", bar: "from-cyan-400 to-cyan-600" },
   amber: { chip: "from-amber-400 to-amber-500", bar: "from-amber-300 to-amber-500" },

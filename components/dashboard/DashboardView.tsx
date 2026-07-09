@@ -27,7 +27,7 @@ import { formatDate } from "@/lib/utils";
 /** Elegant teal-forward ramp with a single warm accent for negotiation. */
 const STAGE_COLORS: Record<string, string> = {
   New: "#64748b",
-  Contacted: "#0d9488",
+  Contacted: "#e11f26",
   TestDrive: "#0891b2",
   Negotiation: "#f59e0b",
   Won: "#059669",
@@ -47,7 +47,7 @@ export function DashboardView() {
         actions={
           <Link
             href="/pos"
-            className="inline-flex h-10 items-center gap-2 rounded-lg bg-gradient-to-b from-brand to-teal-700 px-4 text-sm font-semibold text-white shadow-md shadow-brand/25 transition-all hover:brightness-[1.08] active:scale-[0.97]"
+            className="inline-flex h-10 items-center gap-2 rounded-lg bg-gradient-to-b from-brand to-red-700 px-4 text-sm font-semibold text-white shadow-md shadow-brand/25 transition-all hover:brightness-[1.08] active:scale-[0.97]"
           >
             <Store className="h-4 w-4" />
             Launch POS

@@ -181,7 +181,7 @@ export function LoginForm() {
             whileTap={reduce || loading ? undefined : { scale: 0.985 }}
             className={cn(
               buttonVariants({ size: "lg" }),
-              "group relative w-full overflow-hidden bg-[linear-gradient(180deg,#0d9488_0%,#0f766e_100%)] text-white shadow-lg shadow-teal-700/25",
+              "group relative w-full overflow-hidden bg-[linear-gradient(180deg,#e11f26_0%,#b8171d_100%)] text-white shadow-lg shadow-red-700/25",
             )}
           >
             {/* sheen */}

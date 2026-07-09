@@ -5,29 +5,29 @@
 :root {
   color-scheme: light;
 
-  /* shadcn/ui design tokens (teal-tuned, HSL channels).
+  /* shadcn/ui design tokens (Graphite & Racing Red — steel neutrals + logo red).
      Additive: consumed only by the shadcn primitives in components/ui/shadcn.
      The global `* { border-border }` base layer is intentionally omitted so
      the existing custom design system is left completely untouched. */
-  --background: 180 22% 98%;
-  --foreground: 180 24% 18%;
+  --background: 220 20% 98%;
+  --foreground: 220 16% 16%;
   --card: 0 0% 100%;
-  --card-foreground: 180 24% 18%;
+  --card-foreground: 220 16% 16%;
   --popover: 0 0% 100%;
-  --popover-foreground: 180 24% 18%;
-  --primary: 175 84% 32%;
+  --popover-foreground: 220 16% 16%;
+  --primary: 358 76% 48%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 180 14% 94%;
-  --secondary-foreground: 180 24% 18%;
-  --muted: 180 14% 95%;
-  --muted-foreground: 195 9% 44%;
-  --accent: 175 55% 93%;
-  --accent-foreground: 175 84% 22%;
+  --secondary: 220 14% 94%;
+  --secondary-foreground: 220 16% 16%;
+  --muted: 220 14% 95%;
+  --muted-foreground: 220 9% 44%;
+  --accent: 356 66% 96%;
+  --accent-foreground: 358 74% 42%;
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
-  --border: 180 14% 89%;
-  --input: 180 14% 86%;
-  --ring: 175 84% 32%;
+  --border: 220 13% 89%;
+  --input: 220 13% 86%;
+  --ring: 358 76% 48%;
   --radius: 0.75rem;
 }
 
@@ -40,12 +40,12 @@ body {
    of warmth so it complements — and contrasts — the warm cream+red logo. */
 body {
   min-height: 100vh;
-  color: #243b3a;
+  color: #1b1e24;
   background:
-    radial-gradient(1150px 640px at 8% -10%, rgba(13, 148, 136, 0.14), transparent 60%),
+    radial-gradient(1150px 640px at 8% -10%, rgba(225, 31, 38, 0.14), transparent 60%),
     radial-gradient(1000px 720px at 100% -2%, rgba(226, 88, 74, 0.07), transparent 55%),
     radial-gradient(1000px 820px at 50% 118%, rgba(100, 116, 139, 0.12), transparent 55%),
-    linear-gradient(158deg, #f3f7f6 0%, #eef3f3 46%, #f6f3ef 100%);
+    linear-gradient(158deg, #f5f6f8 0%, #eef0f3 46%, #f7f8fa 100%);
   background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   font-feature-settings: "tnum" 1; /* tabular figures for money columns */
@@ -58,7 +58,7 @@ body {
     backdrop-filter: blur(20px) saturate(160%);
     -webkit-backdrop-filter: blur(20px) saturate(160%);
     border: 1px solid rgba(255, 255, 255, 0.6);
-    box-shadow: 0 12px 34px -16px rgba(15, 60, 55, 0.22);
+    box-shadow: 0 12px 34px -16px rgba(24, 28, 36, 0.22);
   }
 
   /* Lighter frost — toolbars, empty states, inset sections. */
@@ -82,7 +82,7 @@ body {
     backdrop-filter: blur(26px) saturate(165%);
     -webkit-backdrop-filter: blur(26px) saturate(165%);
     border: 1px solid rgba(255, 255, 255, 0.7);
-    box-shadow: 0 24px 60px -20px rgba(15, 60, 55, 0.32);
+    box-shadow: 0 24px 60px -20px rgba(24, 28, 36, 0.32);
   }
 
   /* Translucent form controls. Border stays visible for usability.
@@ -156,7 +156,7 @@ input[type="number"] {
   height: 42rem;
   top: -12rem;
   left: -10rem;
-  background: radial-gradient(circle, rgba(20, 184, 166, 0.16), transparent 70%);
+  background: radial-gradient(circle, rgba(225, 31, 38, 0.16), transparent 70%);
   animation: atmosDrift1 24s ease-in-out infinite;
 }
 .atmos-b2 {
@@ -164,7 +164,7 @@ input[type="number"] {
   height: 36rem;
   top: 28%;
   right: -12rem;
-  background: radial-gradient(circle, rgba(34, 211, 238, 0.12), transparent 70%);
+  background: radial-gradient(circle, rgba(225, 31, 38, 0.09), transparent 70%);
   animation: atmosDrift2 30s ease-in-out infinite;
 }
 .atmos-b3 {
@@ -172,7 +172,7 @@ input[type="number"] {
   height: 32rem;
   bottom: -14rem;
   left: 32%;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.12), transparent 70%);
+  background: radial-gradient(circle, rgba(120, 130, 145, 0.12), transparent 70%);
   animation: atmosDrift3 27s ease-in-out infinite;
 }
 .atmos-grain {
@@ -211,7 +211,7 @@ input[type="number"] {
   transition: opacity 0.3s ease;
   background: radial-gradient(
     240px circle at var(--mx, 50%) var(--my, 50%),
-    rgba(13, 148, 136, 0.16),
+    rgba(225, 31, 38, 0.16),
     transparent 62%
   );
 }
@@ -239,8 +239,8 @@ input[type="number"] {
     linear-gradient(
       105deg,
       transparent 30%,
-      rgba(45, 212, 191, 0.14) 45%,
-      rgba(34, 211, 238, 0.12) 55%,
+      rgba(225, 31, 38, 0.14) 45%,
+      rgba(225, 31, 38, 0.12) 55%,
       transparent 70%
     );
 }
@@ -255,8 +255,8 @@ input[type="number"] {
 }
 .hoverglow:hover {
   transform: translateY(-3px);
-  box-shadow: 0 22px 50px -26px rgba(13, 148, 136, 0.45),
-    0 0 0 1px rgba(13, 148, 136, 0.12);
+  box-shadow: 0 22px 50px -26px rgba(225, 31, 38, 0.45),
+    0 0 0 1px rgba(225, 31, 38, 0.12);
 }
 
 /* Animated conic gradient border ring (shows on hover). */
@@ -277,8 +277,8 @@ input[type="number"] {
   background: conic-gradient(
     from var(--fx-angle),
     transparent 0%,
-    rgba(20, 184, 166, 0.7) 12%,
-    rgba(34, 211, 238, 0.6) 22%,
+    rgba(225, 31, 38, 0.7) 12%,
+    rgba(225, 31, 38, 0.6) 22%,
     transparent 40%
   );
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
@@ -391,7 +391,7 @@ input[type="number"] {
 .skeleton {
   position: relative;
   overflow: hidden;
-  background: rgba(15, 60, 55, 0.07);
+  background: rgba(24, 28, 36, 0.07);
   border-radius: 8px;
 }
 .skeleton::after {

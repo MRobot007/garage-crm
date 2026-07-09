@@ -87,11 +87,11 @@ export function BrandPanel() {
   return (
     <div
       ref={rootRef}
-      className="relative hidden overflow-hidden bg-[linear-gradient(160deg,#0c4a45_0%,#0a3a37_46%,#062725_100%)] lg:flex lg:flex-col lg:justify-between"
+      className="relative hidden overflow-hidden bg-[linear-gradient(160deg,#20242c_0%,#191c22_46%,#101216_100%)] lg:flex lg:flex-col lg:justify-between"
     >
       {/* Aurora layer */}
       <div ref={blobsRef} className="pointer-events-none absolute inset-0">
-        <div className="aurora-blob absolute -left-24 top-[-10%] h-[42rem] w-[42rem] rounded-full bg-teal-400/25 blur-[120px]" />
+        <div className="aurora-blob absolute -left-24 top-[-10%] h-[42rem] w-[42rem] rounded-full bg-red-400/25 blur-[120px]" />
         <div className="aurora-blob absolute right-[-15%] top-[18%] h-[34rem] w-[34rem] rounded-full bg-cyan-300/20 blur-[120px]" />
         <div className="aurora-blob absolute bottom-[-18%] left-[22%] h-[38rem] w-[38rem] rounded-full bg-emerald-400/20 blur-[130px]" />
       </div>
@@ -122,7 +122,7 @@ export function BrandPanel() {
             }
           >
             {/* soft brand glow behind the mark */}
-            <div className="absolute inset-0 rounded-full bg-teal-300/25 blur-2xl" />
+            <div className="absolute inset-0 rounded-full bg-red-300/25 blur-2xl" />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/logo.png"
@@ -140,7 +140,7 @@ export function BrandPanel() {
         <div>
           <motion.div
             variants={item}
-            className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-teal-100 backdrop-blur"
+            className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-red-100 backdrop-blur"
           >
             <Sparkles className="h-3.5 w-3.5" />
             Dealership operations, refined
@@ -157,7 +157,7 @@ export function BrandPanel() {
           </motion.h1>
           <motion.p
             variants={item}
-            className="mt-4 max-w-sm text-[15px] leading-relaxed text-teal-100/70"
+            className="mt-4 max-w-sm text-[15px] leading-relaxed text-red-100/70"
           >
             Leads, inventory, accessories, sales and invoicing — kept in sync,
             beautifully organised, and always at hand.
@@ -166,19 +166,19 @@ export function BrandPanel() {
           <motion.ul variants={item} className="mt-10 space-y-4">
             {FEATURES.map((f) => (
               <li key={f.title} className="flex items-start gap-3.5">
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/10 text-teal-200 backdrop-blur">
+                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/10 text-red-200 backdrop-blur">
                   <f.icon className="h-[18px] w-[18px]" />
                 </span>
                 <div>
                   <p className="text-sm font-medium text-white">{f.title}</p>
-                  <p className="text-[13px] text-teal-100/60">{f.copy}</p>
+                  <p className="text-[13px] text-red-100/60">{f.copy}</p>
                 </div>
               </li>
             ))}
           </motion.ul>
         </div>
 
-        <motion.p variants={item} className="text-xs text-teal-100/50">
+        <motion.p variants={item} className="text-xs text-red-100/50">
           © {"2026"} VOZIDEX Motors · Secure staff access
         </motion.p>
       </motion.div>

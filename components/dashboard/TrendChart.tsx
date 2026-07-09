@@ -8,7 +8,7 @@ import type { TrendPoint, TrendRange } from "@/lib/types";
 type Metric = "leads" | "sales";
 
 const METRICS: Record<Metric, { label: string; color: string; light: string }> = {
-  leads: { label: "New leads", color: "#0d9488", light: "#2dd4bf" },
+  leads: { label: "New leads", color: "#e11f26", light: "#2dd4bf" },
   sales: { label: "Sales", color: "#059669", light: "#34d399" },
 };
 
@@ -150,7 +150,7 @@ export function TrendChart({ data }: { data: Record<TrendRange, TrendPoint[]> })
               x2={W - PAD_X}
               y1={PAD_TOP + INNER_H * g}
               y2={PAD_TOP + INNER_H * g}
-              stroke="rgba(15,60,55,0.06)"
+              stroke="rgba(20, 24, 32,0.06)"
               strokeWidth={1}
             />
           ))}
