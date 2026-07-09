@@ -16,7 +16,7 @@ import { ApiError } from "@/lib/fetcher";
 import type { ShiftEntry } from "@/lib/types";
 
 function fmtTime(iso: string): string {
-  return new Date(iso).toLocaleString("en-US", {
+  return new Date(iso).toLocaleString("en-GB", {
     day: "numeric",
     month: "short",
     hour: "numeric",

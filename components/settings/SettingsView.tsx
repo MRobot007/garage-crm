@@ -24,7 +24,7 @@ export function SettingsView() {
 
   const [values, setValues] = useState({
     businessName: "",
-    currency: "₹",
+    currency: "Kč",
     gstPercent: "8",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});

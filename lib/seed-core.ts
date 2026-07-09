@@ -30,8 +30,8 @@ export async function seedDatabase(prisma: PrismaClient): Promise<void> {
 
   await prisma.setting.upsert({
     where: { id: "default" },
-    update: { businessName: "VOZIDEX", currency: "$", gstPercent: TAX },
-    create: { id: "default", businessName: "VOZIDEX", currency: "$", gstPercent: TAX },
+    update: { businessName: "VOZIDEX", currency: "Kč", gstPercent: TAX },
+    create: { id: "default", businessName: "VOZIDEX", currency: "Kč", gstPercent: TAX },
   });
 
   // ---------------- Users (bootstrap only — never wipe existing accounts) ----
@@ -48,7 +48,7 @@ export async function seedDatabase(prisma: PrismaClient): Promise<void> {
     });
   }
 
-  // ---------------- Cars (odometer in miles, prices in USD) ----------------
+  // ---------------- Cars (odometer in km, prices in Kč) ----------------
   const cars = await Promise.all(
     [
       { make: "Toyota", model: "Camry SE", year: 2021, type: "Used", regNo: "7XYZ123", km: 34200, costPrice: 16500, askingPrice: 18900, status: "Available", addedDate: daysAgo(12) },
@@ -59,7 +59,7 @@ export async function seedDatabase(prisma: PrismaClient): Promise<void> {
     ].map((data) => prisma.car.create({ data })),
   );
 
-  // ---------------- Accessories (prices in USD) ----------------
+  // ---------------- Accessories (prices in Kč) ----------------
   const acc = await Promise.all(
     [
       { name: 'Android Head Unit 10"', sku: "AUD-STR-10", category: "Audio", qty: 14, costPrice: 95, sellPrice: 149, reorderLevel: 5, supplier: "SoundKing" },

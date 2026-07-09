@@ -106,8 +106,8 @@ export function AccessoryModal({ open, onClose, accessory }: AccessoryModalProps
         <Select label="Category" value={values.category} onChange={(e) => set("category", e.target.value)} options={ACCESSORY_CATEGORIES.map((c) => ({ value: c, label: c }))} />
         <Input label="Quantity" required type="number" value={values.qty} onChange={(e) => set("qty", e.target.value)} error={errors.qty} />
         <Input label="Reorder level" type="number" value={values.reorderLevel} onChange={(e) => set("reorderLevel", e.target.value)} error={errors.reorderLevel} />
-        <Input label="Cost price (₹)" required type="number" value={values.costPrice} onChange={(e) => set("costPrice", e.target.value)} error={errors.costPrice} />
-        <Input label="Sell price (₹)" required type="number" value={values.sellPrice} onChange={(e) => set("sellPrice", e.target.value)} error={errors.sellPrice} />
+        <Input label="Cost price (Kč)" required type="number" value={values.costPrice} onChange={(e) => set("costPrice", e.target.value)} error={errors.costPrice} />
+        <Input label="Sell price (Kč)" required type="number" value={values.sellPrice} onChange={(e) => set("sellPrice", e.target.value)} error={errors.sellPrice} />
         <Input label="Supplier" value={values.supplier} onChange={(e) => set("supplier", e.target.value)} placeholder="Optional" className="sm:col-span-2" />
       </form>
     </Modal>

@@ -163,7 +163,7 @@ export function CarsView() {
                     {car.make} {car.model} {car.year}
                   </Link>
                   <p className="text-xs text-gray-500">
-                    {car.regNo} · {formatNumber(car.km)} mi · {car.daysInStock}d
+                    {car.regNo} · {formatNumber(car.km)} km · {car.daysInStock}d
                   </p>
                 </div>
                 <div className="flex shrink-0 flex-col items-end gap-1">
@@ -222,7 +222,7 @@ export function CarsView() {
               <TH>Kind</TH>
               <TH>Condition</TH>
               <TH>Reg no</TH>
-              <TH className="text-right">Miles</TH>
+              <TH className="text-right">Km</TH>
               <TH className="text-right">Asking</TH>
               <TH className="text-right">Margin</TH>
               <TH className="text-right">Days</TH>

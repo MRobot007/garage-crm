@@ -30,7 +30,7 @@ export function Topbar({ onToggleCollapse, onOpenDrawer }: TopbarProps) {
   // Set the date on the client to avoid SSR/client timezone mismatch.
   useEffect(() => {
     setToday(
-      new Date().toLocaleDateString("en-IN", {
+      new Date().toLocaleDateString("en-GB", {
         weekday: "short",
         day: "numeric",
         month: "short",

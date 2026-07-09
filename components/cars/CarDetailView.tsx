@@ -58,7 +58,7 @@ export function CarDetailView({ id }: { id: string }) {
     ["Year", String(car.year)],
     ["Type", car.type],
     ["Reg. number", car.regNo],
-    ["Odometer", `${formatNumber(car.km)} mi`],
+    ["Odometer", `${formatNumber(car.km)} km`],
     ["Cost price", formatMoney(car.costPrice)],
     ["Asking price", formatMoney(car.askingPrice)],
     ["Margin", formatMoney(car.margin)],

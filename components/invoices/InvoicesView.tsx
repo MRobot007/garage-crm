@@ -311,7 +311,7 @@ export function InvoicesView() {
               <span className="font-medium tabular-nums">{formatMoney(payFor.total)}</span>
             </div>
             <Input
-              label="Total amount received (₹)"
+              label="Total amount received (Kč)"
               type="number"
               value={payAmount}
               onChange={(e) => setPayAmount(e.target.value)}

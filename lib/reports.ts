@@ -98,7 +98,7 @@ export async function buildReports(): Promise<ReportsData> {
     leadsBySource,
     deadStockCars,
     slowAccessories,
-    month: new Date().toLocaleDateString("en-IN", {
+    month: new Date().toLocaleDateString("en-GB", {
       month: "long",
       year: "numeric",
     }),

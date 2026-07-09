@@ -39,16 +39,16 @@ import type { Accessory } from "@/lib/types";
 
 const SERVICES_CAT = "Services";
 
-/** Common garage services offered at the counter (price in USD). */
+/** Common garage services offered at the counter (price in Kč). */
 const PRESET_SERVICES: { name: string; price: number }[] = [
-  { name: "Oil & Filter Change", price: 60 },
-  { name: "Tire Rotation", price: 40 },
-  { name: "Wheel Alignment", price: 90 },
-  { name: "Brake Inspection", price: 50 },
-  { name: "AC Service & Recharge", price: 120 },
-  { name: "Full Wash & Detail", price: 150 },
-  { name: "Diagnostic Scan", price: 80 },
-  { name: "Battery Replacement", price: 180 },
+  { name: "Oil & Filter Change", price: 990 },
+  { name: "Tire Rotation", price: 490 },
+  { name: "Wheel Alignment", price: 890 },
+  { name: "Brake Inspection", price: 690 },
+  { name: "AC Service & Recharge", price: 1490 },
+  { name: "Full Wash & Detail", price: 1290 },
+  { name: "Diagnostic Scan", price: 790 },
+  { name: "Battery Replacement", price: 2490 },
 ];
 
 interface CartLine {
@@ -228,7 +228,7 @@ export function PosView() {
   function addManualItem() {
     const name = window.prompt("Item / service name");
     if (!name?.trim()) return;
-    const priceStr = window.prompt(`Price for “${name.trim()}” (USD)`, "0");
+    const priceStr = window.prompt(`Price for “${name.trim()}” (Kč)`, "0");
     const price = Math.max(0, Math.round(Number(priceStr) || 0));
     addService(name.trim(), price);
   }
@@ -295,7 +295,7 @@ export function PosView() {
         change,
         customer,
         cashier: me?.name ?? "",
-        at: new Date().toLocaleString("en-US"),
+        at: new Date().toLocaleString("en-GB"),
       });
       clearCart();
       setCustName("");

@@ -53,7 +53,7 @@ function roleTone(role: string): "blue" | "amber" | "neutral" {
 function dateTime(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleString("en-US", {
+  return d.toLocaleString("en-GB", {
     day: "numeric",
     month: "short",
     hour: "numeric",

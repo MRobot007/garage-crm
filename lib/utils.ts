@@ -1,22 +1,22 @@
 // Small formatting/util helpers shared across client & server.
 
-const USD = new Intl.NumberFormat("en-US", {
+const MONEY = new Intl.NumberFormat("cs-CZ", {
   style: "currency",
-  currency: "USD",
+  currency: "CZK",
   maximumFractionDigits: 0,
 });
 
-const NUM = new Intl.NumberFormat("en-US", {
+const NUM = new Intl.NumberFormat("cs-CZ", {
   maximumFractionDigits: 0,
 });
 
-/** Format a whole-dollar amount as US currency, e.g. $18,900. */
+/** Format a whole-koruna amount as Czech currency, e.g. 18 900 Kč. */
 export function formatMoney(amount: number | null | undefined): string {
   const n = typeof amount === "number" && Number.isFinite(amount) ? amount : 0;
-  return USD.format(Math.round(n));
+  return MONEY.format(Math.round(n));
 }
 
-/** Format a plain number with US grouping (no currency symbol). */
+/** Format a plain number with Czech grouping (no currency symbol). */
 export function formatNumber(n: number | null | undefined): string {
   return NUM.format(typeof n === "number" && Number.isFinite(n) ? n : 0);
 }
@@ -28,7 +28,7 @@ export function formatDate(
   if (!d) return "—";
   const date = typeof d === "string" ? new Date(d) : d;
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString("en-IN", {
+  return date.toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
     year: "numeric",

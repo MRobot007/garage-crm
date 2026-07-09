@@ -3,7 +3,7 @@
 
 export interface LineLike {
   qty: number;
-  price: number; // unit price in Rupees
+  price: number; // unit price in Kč (CZK)
 }
 
 export interface InvoiceTotals {

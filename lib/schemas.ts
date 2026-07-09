@@ -224,7 +224,7 @@ export type UserUpdateValues = z.infer<typeof userUpdateSchema>;
 // ---------------------------- Settings --------------------------
 export const settingsSchema = z.object({
   businessName: z.string().trim().min(1, "Business name is required"),
-  currency: z.string().trim().min(1).default("₹"),
+  currency: z.string().trim().min(1).default("Kč"),
   gstPercent: positiveIntFromNow.max(100, "Tax cannot exceed 100%").default(8),
 });
 export type SettingsValues = z.infer<typeof settingsSchema>;

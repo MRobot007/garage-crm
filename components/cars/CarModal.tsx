@@ -105,15 +105,15 @@ export function CarModal({ open, onClose, car }: CarModalProps) {
       }
     >
       <form id="car-form" onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-2">
-        <Input label="Make" required value={values.make} onChange={(e) => set("make", e.target.value)} error={errors.make} placeholder="Maruti Suzuki" />
-        <Input label="Model" required value={values.model} onChange={(e) => set("model", e.target.value)} error={errors.model} placeholder="Swift VXi" />
+        <Input label="Make" required value={values.make} onChange={(e) => set("make", e.target.value)} error={errors.make} placeholder="Škoda / Yamaha" />
+        <Input label="Model" required value={values.model} onChange={(e) => set("model", e.target.value)} error={errors.model} placeholder="Octavia / MT-07" />
         <Input label="Year" required type="number" value={values.year} onChange={(e) => set("year", e.target.value)} error={errors.year} />
         <Select label="Vehicle" value={values.category} onChange={(e) => set("category", e.target.value)} options={VEHICLE_CATEGORIES.map((c) => ({ value: c, label: c }))} />
         <Select label="Condition" value={values.type} onChange={(e) => set("type", e.target.value)} options={CAR_TYPES.map((t) => ({ value: t, label: t }))} />
-        <Input label="Reg. number" required value={values.regNo} onChange={(e) => set("regNo", e.target.value)} error={errors.regNo} placeholder="GJ03AB1234" />
-        <Input label="Odometer (miles)" type="number" value={values.km} onChange={(e) => set("km", e.target.value)} error={errors.km} />
-        <Input label="Cost price (₹)" required type="number" value={values.costPrice} onChange={(e) => set("costPrice", e.target.value)} error={errors.costPrice} placeholder="520000" />
-        <Input label="Asking price (₹)" required type="number" value={values.askingPrice} onChange={(e) => set("askingPrice", e.target.value)} error={errors.askingPrice} placeholder="615000" />
+        <Input label="Reg. number" required value={values.regNo} onChange={(e) => set("regNo", e.target.value)} error={errors.regNo} placeholder="1AB 2345" />
+        <Input label="Odometer (km)" type="number" value={values.km} onChange={(e) => set("km", e.target.value)} error={errors.km} />
+        <Input label="Cost price (Kč)" required type="number" value={values.costPrice} onChange={(e) => set("costPrice", e.target.value)} error={errors.costPrice} placeholder="280000" />
+        <Input label="Asking price (Kč)" required type="number" value={values.askingPrice} onChange={(e) => set("askingPrice", e.target.value)} error={errors.askingPrice} placeholder="320000" />
         <Select label="Status" value={values.status} onChange={(e) => set("status", e.target.value)} options={CAR_STATUSES.map((s) => ({ value: s, label: s }))} className="sm:col-span-2" />
       </form>
     </Modal>

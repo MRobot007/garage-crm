@@ -135,7 +135,7 @@ export function LeadModal({ open, onClose, lead }: LeadModalProps) {
           value={values.interestedIn}
           onChange={(e) => set("interestedIn", e.target.value)}
           error={errors.interestedIn}
-          placeholder="e.g. Hyundai Creta, alloy wheels"
+          placeholder="e.g. Škoda Octavia, MT-07, alloy wheels"
           className="sm:col-span-2"
         />
         <Select

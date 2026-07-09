@@ -237,7 +237,7 @@ export function InvoiceModal({ open, onClose, prefill, onCreated }: InvoiceModal
           ) : (
             <div className="grid gap-4 sm:grid-cols-3">
               <Input label="Name" required value={customerName} onChange={(e) => setCustomerName(e.target.value)} error={errors.customerName} placeholder="Customer name" />
-              <Input label="Phone" required value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="+91 …" />
+              <Input label="Phone" required value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="+420 …" />
               <Input label="Email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="Optional" />
             </div>
           )}
@@ -309,7 +309,7 @@ export function InvoiceModal({ open, onClose, prefill, onCreated }: InvoiceModal
                       />
                     </label>
                     <label className="flex items-center gap-1 text-xs text-gray-500">
-                      ₹
+                      Kč
                       <input
                         type="number"
                         min={0}
@@ -341,9 +341,9 @@ export function InvoiceModal({ open, onClose, prefill, onCreated }: InvoiceModal
 
         {/* Money */}
         <section className="grid gap-4 sm:grid-cols-3">
-          <Input label="Discount (₹)" type="number" value={discount} onChange={(e) => setDiscount(e.target.value)} />
+          <Input label="Discount (Kč)" type="number" value={discount} onChange={(e) => setDiscount(e.target.value)} />
           <Input label="Sales Tax %" type="number" value={gstPercent} onChange={(e) => setGstPercent(e.target.value)} />
-          <Input label="Amount received (₹)" type="number" value={received} onChange={(e) => setReceived(e.target.value)} />
+          <Input label="Amount received (Kč)" type="number" value={received} onChange={(e) => setReceived(e.target.value)} />
         </section>
 
         {/* Totals preview */}
