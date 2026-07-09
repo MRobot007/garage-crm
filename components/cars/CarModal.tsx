@@ -8,7 +8,7 @@ import { Select } from "@/components/ui/Select";
 import { useToast } from "@/components/ui/Toast";
 import { carSchema } from "@/lib/schemas";
 import { flattenZod } from "@/lib/api";
-import { CAR_STATUSES, CAR_TYPES } from "@/lib/constants";
+import { CAR_STATUSES, CAR_TYPES, VEHICLE_CATEGORIES } from "@/lib/constants";
 import { useCreateCar, useUpdateCar } from "@/hooks/useCars";
 import { ApiError } from "@/lib/fetcher";
 import type { Car } from "@/lib/types";
@@ -24,6 +24,7 @@ const empty = {
   model: "",
   year: String(new Date().getFullYear()),
   type: "Used",
+  category: "Car",
   regNo: "",
   km: "0",
   costPrice: "",
@@ -49,6 +50,7 @@ export function CarModal({ open, onClose, car }: CarModalProps) {
             model: car.model,
             year: String(car.year),
             type: car.type,
+            category: car.category ?? "Car",
             regNo: car.regNo,
             km: String(car.km),
             costPrice: String(car.costPrice),
@@ -73,10 +75,10 @@ export function CarModal({ open, onClose, car }: CarModalProps) {
     try {
       if (isEdit && car) {
         await update.mutateAsync({ id: car.id, values: parsed.data });
-        toast.success("Car updated");
+        toast.success("Vehicle updated");
       } else {
         await create.mutateAsync(parsed.data);
-        toast.success("Car added");
+        toast.success("Vehicle added");
       }
       onClose();
     } catch (err) {
@@ -90,14 +92,14 @@ export function CarModal({ open, onClose, car }: CarModalProps) {
     <Modal
       open={open}
       onClose={onClose}
-      title={isEdit ? "Edit car" : "Add car"}
+      title={isEdit ? "Edit vehicle" : "Add vehicle"}
       footer={
         <>
           <Button variant="secondary" onClick={onClose} disabled={busy}>
             Cancel
           </Button>
           <Button type="submit" form="car-form" loading={busy}>
-            {isEdit ? "Save changes" : "Add car"}
+            {isEdit ? "Save changes" : "Add vehicle"}
           </Button>
         </>
       }
@@ -106,7 +108,8 @@ export function CarModal({ open, onClose, car }: CarModalProps) {
         <Input label="Make" required value={values.make} onChange={(e) => set("make", e.target.value)} error={errors.make} placeholder="Maruti Suzuki" />
         <Input label="Model" required value={values.model} onChange={(e) => set("model", e.target.value)} error={errors.model} placeholder="Swift VXi" />
         <Input label="Year" required type="number" value={values.year} onChange={(e) => set("year", e.target.value)} error={errors.year} />
-        <Select label="Type" value={values.type} onChange={(e) => set("type", e.target.value)} options={CAR_TYPES.map((t) => ({ value: t, label: t }))} />
+        <Select label="Vehicle" value={values.category} onChange={(e) => set("category", e.target.value)} options={VEHICLE_CATEGORIES.map((c) => ({ value: c, label: c }))} />
+        <Select label="Condition" value={values.type} onChange={(e) => set("type", e.target.value)} options={CAR_TYPES.map((t) => ({ value: t, label: t }))} />
         <Input label="Reg. number" required value={values.regNo} onChange={(e) => set("regNo", e.target.value)} error={errors.regNo} placeholder="GJ03AB1234" />
         <Input label="Odometer (miles)" type="number" value={values.km} onChange={(e) => set("km", e.target.value)} error={errors.km} />
         <Input label="Cost price (₹)" required type="number" value={values.costPrice} onChange={(e) => set("costPrice", e.target.value)} error={errors.costPrice} placeholder="520000" />

@@ -46,9 +46,9 @@ export function CarDetailView({ id }: { id: string }) {
   if (isError || !car) {
     return (
       <div>
-        <PageHeader title="Car not found" />
+        <PageHeader title="Vehicle not found" />
         <Link href="/cars" className="text-sm font-medium text-brand hover:underline">
-          ← Back to cars
+          ← Back to vehicles
         </Link>
       </div>
     );
@@ -70,7 +70,7 @@ export function CarDetailView({ id }: { id: string }) {
     <div>
       <div className="mb-4">
         <Link href="/cars" className="text-sm font-medium text-brand hover:underline">
-          ← Back to cars
+          ← Back to vehicles
         </Link>
       </div>
 
@@ -122,7 +122,7 @@ export function CarDetailView({ id }: { id: string }) {
         <Card className="mt-6">
           <CardBody className="flex items-center justify-between">
             <p className="text-sm text-gray-600">
-              This car was sold on invoice{" "}
+              This vehicle was sold on invoice{" "}
               <span className="font-medium text-ink">{car.invoice.invoiceNo}</span>.
             </p>
             <Link href={`/invoices/${car.invoice.id}`}>

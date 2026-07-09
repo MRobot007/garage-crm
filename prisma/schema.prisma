@@ -49,6 +49,7 @@ model Car {
   model        String
   year         Int
   type         String   @default("Used") // New | Used
+  category     String   @default("Car")  // Car | Bike
   regNo        String   @unique
   km           Int      @default(0)
   costPrice    Int
@@ -61,6 +62,7 @@ model Car {
 
   @@index([status])
   @@index([type])
+  @@index([category])
 }
 
 /// An accessory SKU in stock.

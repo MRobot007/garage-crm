@@ -22,6 +22,7 @@ export interface Car {
   model: string;
   year: number;
   type: string;
+  category: string;
   regNo: string;
   km: number;
   costPrice: number;

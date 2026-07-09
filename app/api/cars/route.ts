@@ -11,12 +11,14 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const status = searchParams.get("status");
     const type = searchParams.get("type");
+    const category = searchParams.get("category");
     const q = searchParams.get("q")?.trim();
 
     const cars = await prisma.car.findMany({
       where: {
         status: status || undefined,
         type: type || undefined,
+        category: category || undefined,
         OR: q
           ? [
               { make: { contains: q } },

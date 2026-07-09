@@ -20,7 +20,8 @@ import {
 } from "@/hooks/useCars";
 import { useStaggerReveal } from "@/hooks/useStaggerReveal";
 import { useMe } from "@/hooks/useMe";
-import { CAR_STATUSES, CAR_TYPES } from "@/lib/constants";
+import { useDebounce } from "@/hooks/useDebounce";
+import { CAR_STATUSES, CAR_TYPES, VEHICLE_CATEGORIES } from "@/lib/constants";
 import { formatMoney, formatNumber } from "@/lib/utils";
 import { ApiError } from "@/lib/fetcher";
 import type { Car } from "@/lib/types";
@@ -29,9 +30,14 @@ export function CarsView() {
   const toast = useToast();
   const [status, setStatus] = useState("all");
   const [type, setType] = useState("all");
+  const [category, setCategory] = useState("all");
   const [q, setQ] = useState("");
+  const dq = useDebounce(q, 250);
 
-  const filters = useMemo(() => ({ status, type, q }), [status, type, q]);
+  const filters = useMemo(
+    () => ({ status, type, category, q: dq }),
+    [status, type, category, dq],
+  );
   const { data: cars, isLoading, isError } = useCars(filters);
   const updateStatus = useUpdateCarStatus();
   const del = useDeleteCar();
@@ -56,10 +62,10 @@ export function CarsView() {
     if (!toDelete) return;
     try {
       await del.mutateAsync(toDelete.id);
-      toast.success("Car deleted");
+      toast.success("Vehicle deleted");
       setToDelete(null);
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : "Couldn’t delete car");
+      toast.error(err instanceof ApiError ? err.message : "Couldn’t delete vehicle");
       setToDelete(null);
     }
   }
@@ -67,8 +73,8 @@ export function CarsView() {
   return (
     <div>
       <PageHeader
-        title="Cars"
-        subtitle="Your inventory — margin and days-in-stock at a glance."
+        title="Vehicles"
+        subtitle="Cars and bikes in stock — margin and days-in-stock at a glance."
         actions={
           <Button
             onClick={() => {
@@ -76,7 +82,7 @@ export function CarsView() {
               setModalOpen(true);
             }}
           >
-            + Add car
+            + Add vehicle
           </Button>
         }
       />
@@ -84,12 +90,22 @@ export function CarsView() {
       <div className="mb-4 flex flex-wrap items-end gap-3">
         <div className="w-full sm:w-64">
           <Input
-            aria-label="Search cars"
+            aria-label="Search vehicles"
             placeholder="Search make, model, reg no…"
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
         </div>
+        <Select
+          aria-label="Filter by vehicle"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="w-36"
+          options={[
+            { value: "all", label: "All vehicles" },
+            ...VEHICLE_CATEGORIES.map((c) => ({ value: c, label: `${c}s` })),
+          ]}
+        />
         <Select
           aria-label="Filter by status"
           value={status}
@@ -101,12 +117,12 @@ export function CarsView() {
           ]}
         />
         <Select
-          aria-label="Filter by type"
+          aria-label="Filter by condition"
           value={type}
           onChange={(e) => setType(e.target.value)}
           className="w-36"
           options={[
-            { value: "all", label: "All types" },
+            { value: "all", label: "All conditions" },
             ...CAR_TYPES.map((t) => ({ value: t, label: t })),
           ]}
         />
@@ -114,18 +130,18 @@ export function CarsView() {
 
       {isLoading && (
         <div className="flex items-center gap-2 py-16 text-gray-500">
-          <Spinner /> Loading cars…
+          <Spinner /> Loading vehicles…
         </div>
       )}
       {isError && (
-        <p className="py-16 text-center text-sm text-bad">Couldn’t load cars.</p>
+        <p className="py-16 text-center text-sm text-bad">Couldn’t load vehicles.</p>
       )}
 
       {cars && cars.length === 0 && (
         <EmptyState
-          title="No cars in inventory"
-          description="Add a car to start tracking stock, margin and sales."
-          actionLabel="+ Add car"
+          title="No vehicles in inventory"
+          description="Add a car or bike to start tracking stock, margin and sales."
+          actionLabel="+ Add vehicle"
           onAction={() => {
             setEditing(null);
             setModalOpen(true);
@@ -150,7 +166,10 @@ export function CarsView() {
                     {car.regNo} · {formatNumber(car.km)} mi · {car.daysInStock}d
                   </p>
                 </div>
-                <Badge tone={car.type === "New" ? "blue" : "neutral"}>{car.type}</Badge>
+                <div className="flex shrink-0 flex-col items-end gap-1">
+                  <Badge tone={car.category === "Bike" ? "amber" : "neutral"}>{car.category}</Badge>
+                  <Badge tone={car.type === "New" ? "blue" : "neutral"}>{car.type}</Badge>
+                </div>
               </div>
               <div className="mt-2 flex items-baseline justify-between">
                 <span className="text-lg font-semibold tabular-nums text-ink">
@@ -199,8 +218,9 @@ export function CarsView() {
         <TableWrap className="hidden sm:block">
           <THead>
             <tr>
-              <TH>Car</TH>
-              <TH>Type</TH>
+              <TH>Vehicle</TH>
+              <TH>Kind</TH>
+              <TH>Condition</TH>
               <TH>Reg no</TH>
               <TH className="text-right">Miles</TH>
               <TH className="text-right">Asking</TH>
@@ -221,6 +241,9 @@ export function CarsView() {
                     {car.make} {car.model}
                   </Link>
                   <div className="text-xs text-gray-500">{car.year}</div>
+                </TD>
+                <TD>
+                  <Badge tone={car.category === "Bike" ? "amber" : "neutral"}>{car.category}</Badge>
                 </TD>
                 <TD>
                   <Badge tone={car.type === "New" ? "blue" : "neutral"}>{car.type}</Badge>
@@ -273,7 +296,7 @@ export function CarsView() {
       <CarModal open={modalOpen} onClose={() => setModalOpen(false)} car={editing} />
       <ConfirmDialog
         open={Boolean(toDelete)}
-        title="Delete car?"
+        title="Delete vehicle?"
         message={`Remove ${toDelete?.make} ${toDelete?.model} (${toDelete?.regNo})? This can’t be undone.`}
         confirmLabel="Delete"
         loading={del.isPending}

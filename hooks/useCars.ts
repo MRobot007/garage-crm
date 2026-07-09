@@ -13,6 +13,7 @@ import { qk } from "./keys";
 export interface CarFilters {
   status?: string;
   type?: string;
+  category?: string;
   q?: string;
 }
 
@@ -20,6 +21,7 @@ function buildQuery(f: CarFilters): string {
   const p = new URLSearchParams();
   if (f.status && f.status !== "all") p.set("status", f.status);
   if (f.type && f.type !== "all") p.set("type", f.type);
+  if (f.category && f.category !== "all") p.set("category", f.category);
   if (f.q) p.set("q", f.q);
   const s = p.toString();
   return s ? `?${s}` : "";

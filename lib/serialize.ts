@@ -19,6 +19,7 @@ export function serializeCar(c: any): Car {
     model: c.model,
     year: c.year,
     type: c.type,
+    category: c.category ?? "Car",
     regNo: c.regNo,
     km: c.km,
     costPrice: c.costPrice,

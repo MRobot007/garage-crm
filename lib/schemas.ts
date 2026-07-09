@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   CAR_STATUSES,
   CAR_TYPES,
+  VEHICLE_CATEGORIES,
   INVOICE_STATUSES,
   LEAD_SOURCES,
   LEAD_STATUSES,
@@ -64,6 +65,7 @@ export const carBaseSchema = z.object({
     .min(1950, "Enter a valid year")
     .max(new Date().getFullYear() + 1, "Year looks too far in the future"),
   type: z.enum(CAR_TYPES).default("Used"),
+  category: z.enum(VEHICLE_CATEGORIES).default("Car"),
   regNo: z.string().trim().min(1, "Registration number is required"),
   km: nonNegInt.default(0),
   costPrice: nonNegInt,

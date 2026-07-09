@@ -42,6 +42,9 @@ export type CarStatus = (typeof CAR_STATUSES)[number];
 export const CAR_TYPES = ["New", "Used"] as const;
 export type CarType = (typeof CAR_TYPES)[number];
 
+export const VEHICLE_CATEGORIES = ["Car", "Bike"] as const;
+export type VehicleCategory = (typeof VEHICLE_CATEGORIES)[number];
+
 export const INVOICE_STATUSES = ["Paid", "Partial", "Pending"] as const;
 export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
 

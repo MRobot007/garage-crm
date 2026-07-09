@@ -29,7 +29,7 @@ export function reportsToCsv(data: ReportsData): string {
   gap();
 
   row("Revenue Split", "Amount");
-  row("Cars", data.revenueSplit.cars);
+  row("Vehicles", data.revenueSplit.cars);
   row("Accessories", data.revenueSplit.accessories);
   row("Total", data.revenueSplit.cars + data.revenueSplit.accessories);
   gap();

@@ -63,7 +63,7 @@ export function ReportsView() {
             ) : (
               <>
                 <BarRow
-                  label="Cars"
+                  label="Vehicles"
                   value={data.revenueSplit.cars}
                   total={revTotal}
                   color="bg-brand"

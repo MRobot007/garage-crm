@@ -97,7 +97,7 @@ export function DashboardView() {
               />,
               <StatCard
                 key="cars"
-                label="Cars in Stock"
+                label="Vehicles in Stock"
                 value={data.totals.carsInStock}
                 icon={<Car />}
                 accent="cyan"

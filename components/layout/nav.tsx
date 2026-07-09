@@ -73,7 +73,7 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     href: "/cars",
-    label: "Cars",
+    label: "Vehicles",
     icon: (
       <Svg>
         <path d="M5 13l1.5-4.5A2 2 0 0 1 8.4 7h7.2a2 2 0 0 1 1.9 1.5L19 13" />
